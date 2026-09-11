@@ -1,14 +1,11 @@
-import { AppShell } from "@/components/shell/app-shell";
+import { MapScreen } from "@/components/map-screen/map-screen";
+import { getAvailableListings, getSavedThisMonth } from "@/lib/data/listings";
 
-export default function Home() {
-  return (
-    <AppShell>
-      <header className="flex-none px-5 pt-4 pb-3">
-        <h1 className="font-display text-ink text-[21px]/[1.15] font-bold">Kilajete</h1>
-        <p className="text-muted mt-0.5 text-[13px]/[1.4]">
-          Quartier Saint-Roch · encombrants à récupérer
-        </p>
-      </header>
-    </AppShell>
-  );
+export default async function Home() {
+  const [listings, savedThisMonth] = await Promise.all([
+    getAvailableListings(),
+    getSavedThisMonth(),
+  ]);
+
+  return <MapScreen listings={listings} savedThisMonth={savedThisMonth} />;
 }

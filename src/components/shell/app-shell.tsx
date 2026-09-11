@@ -19,7 +19,7 @@ export function AppShell({ map, children }: AppShellProps) {
   return (
     <div className="bg-page wide:justify-start flex h-dvh min-h-0 flex-1 justify-center">
       <div className="bg-map wide:block relative hidden min-w-0 flex-1 overflow-hidden">{map}</div>
-      <div className="border-line bg-surface wide:w-[420px] wide:max-w-none wide:flex-none wide:border-r-0 flex w-full max-w-[430px] min-w-0 flex-col border-x">
+      <div className="border-line bg-surface wide:w-[420px] wide:max-w-none wide:flex-none wide:border-r-0 flex min-h-0 w-full max-w-[430px] min-w-0 flex-col border-x">
         {children}
       </div>
     </div>
