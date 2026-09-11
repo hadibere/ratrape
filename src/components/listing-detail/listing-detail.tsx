@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { DirectionsButton } from "@/components/listing-detail/directions-button";
 import { useNeighborhood } from "@/components/shell/neighborhood-context";
 import { formatPickup, formatPosted } from "@/lib/format";
-import { directionsUrl, distanceMeters, formatDistance, formatWalk } from "@/lib/geo";
+import { distanceMeters, formatDistance, formatWalk } from "@/lib/geo";
 import { swatchClass, type Listing } from "@/lib/types";
 
 function InfoRow({
@@ -87,14 +88,7 @@ export function ListingDetail({ listing }: { listing: Listing }) {
       </div>
 
       <div className="wide:px-6 wide:pb-[22px] border-line-soft bg-surface flex flex-none gap-2.5 border-t px-5 pt-3.5 pb-5">
-        <a
-          href={directionsUrl(center, listing)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="wide:h-[52px] bg-brand font-display hover:bg-brand-hover flex h-[54px] flex-1 items-center justify-center rounded-2xl text-base font-bold text-white"
-        >
-          Y aller
-        </a>
+        <DirectionsButton listing={listing} />
         <button
           type="button"
           onClick={() => setTaken((v) => !v)}

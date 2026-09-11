@@ -42,3 +42,6 @@ next-env.d.ts
 
 # worker MapLibre recopié depuis node_modules
 /public/maplibre/
+
+# compilations de vérification, hors du dossier du serveur de dev
+/.next-build/

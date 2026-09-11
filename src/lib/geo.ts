@@ -38,13 +38,12 @@ export function offsetMeters(from: LatLng, to: LatLng): { east: number; north: n
   };
 }
 
-/**
- * Itinéraire piéton sur OpenStreetMap, même fournisseur que nos tuiles.
- *
- * Un lien vers Google Maps est vidé de son texte par certains bloqueurs de
- * publicité, et il expédie la position de l'habitant à un tiers.
- */
-export function directionsUrl(from: LatLng, to: LatLng): string {
-  const route = `${from.lat},${from.lng};${to.lat},${to.lng}`;
-  return `https://www.openstreetmap.org/directions?engine=fossgis_osrm_foot&route=${encodeURIComponent(route)}`;
+/** Itinéraire en voiture dans Google Maps, depuis la position courante du téléphone. */
+export function googleMapsUrl(to: LatLng): string {
+  return `https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=${to.lat},${to.lng}`;
+}
+
+/** Navigation Waze, en voiture : c'est le seul mode de l'application. */
+export function wazeUrl(to: LatLng): string {
+  return `https://www.waze.com/ul?ll=${to.lat}%2C${to.lng}&navigate=yes`;
 }
