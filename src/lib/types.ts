@@ -41,3 +41,16 @@ export function swatchClass(category: Category): string {
       return "swatch-other";
   }
 }
+
+/** Article et libellé au singulier, pour la phrase de confirmation. */
+export const CATEGORY_PHRASE: Record<Category, { article: "le" | "la"; label: string }> = {
+  Meubles: { article: "le", label: "meuble" },
+  Électro: { article: "le", label: "appareil" },
+  Vélos: { article: "le", label: "vélo" },
+  Déco: { article: "le", label: "objet de déco" },
+  Literie: { article: "la", label: "literie" },
+  Autre: { article: "le", label: "objet" },
+};
+
+export const PICKUP_CHOICES = ["Jeudi", "Vendredi", "Je ne sais pas"] as const;
+export type PickupChoice = (typeof PICKUP_CHOICES)[number];

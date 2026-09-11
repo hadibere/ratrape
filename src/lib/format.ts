@@ -90,3 +90,9 @@ export function formatPickup(iso: string | null): string {
   }).format(d);
   return `${cap(day)}, ${clock(d).replace(":", "h")}`;
 }
+
+/** « jeudi » — pour la phrase de confirmation. */
+export function weekdayLabel(iso: string | null): string {
+  if (!iso) return "bientôt";
+  return new Intl.DateTimeFormat("fr-FR", { timeZone: TZ, weekday: "long" }).format(new Date(iso));
+}

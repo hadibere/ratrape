@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { EmptyState } from "@/components/listings/empty-state";
 import { FilterChips } from "@/components/listings/filter-chips";
 import { ListingCard, ListingRow } from "@/components/listings/listing-card";
@@ -56,12 +58,12 @@ export function MapPanel() {
           )}
         </div>
         <div className="wide:px-0 px-5">
-          <button
-            type="button"
-            className="wide:h-14 bg-brand font-display shadow-cta hover:bg-brand-hover h-[58px] w-full cursor-pointer rounded-[18px] text-[17px] font-bold text-white"
+          <Link
+            href="/deposer"
+            className="wide:h-14 bg-brand font-display shadow-cta hover:bg-brand-hover flex h-[58px] w-full items-center justify-center rounded-[18px] text-[17px] font-bold text-white"
           >
             Je dépose un encombrant
-          </button>
+          </Link>
         </div>
       </div>
     </>
