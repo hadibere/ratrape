@@ -17,7 +17,7 @@ const nunito = Nunito({
 });
 
 export const metadata: Metadata = {
-  title: "Kilajete",
+  title: "Ratrape",
   description:
     "Un encombrant sur le trottoir ? Signalez-le sur la carte du quartier : un voisin peut venir le récupérer avant le passage du camion.",
 };

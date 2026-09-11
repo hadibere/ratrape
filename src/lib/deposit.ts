@@ -19,4 +19,4 @@ export type DepositInput = z.infer<typeof depositSchema>;
 export type DepositState = { error?: string };
 
 /** Le jeton de gestion transite par un cookie court plutôt que par l'URL. */
-export const MANAGE_COOKIE = "kilajete_manage";
+export const MANAGE_COOKIE = "ratrape_manage";

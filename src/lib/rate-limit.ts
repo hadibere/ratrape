@@ -10,8 +10,8 @@ import "server-only";
 type Hits = number[];
 
 const buckets: Map<string, Hits> = ((
-  globalThis as { __kilajeteRateLimit?: Map<string, Hits> }
-).__kilajeteRateLimit ??= new Map());
+  globalThis as { __ratrapeRateLimit?: Map<string, Hits> }
+).__ratrapeRateLimit ??= new Map());
 
 export function checkRateLimit(key: string, limit: number, windowMs: number): boolean {
   const now = Date.now();

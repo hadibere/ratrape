@@ -19,7 +19,7 @@ export function MapPanel() {
     <>
       <div className="wide:border-line-soft wide:px-6 wide:pt-[22px] wide:pb-3.5 wide:border-b flex-none px-5 pt-4 pb-3">
         <h1 className="wide:text-[22px] font-display text-ink text-[21px]/[1.15] font-bold">
-          Kilajete
+          Ratrape
         </h1>
         <p className="text-muted mt-0.5 text-[13px]/[1.4]">
           Quartier Saint-Roch · encombrants à récupérer

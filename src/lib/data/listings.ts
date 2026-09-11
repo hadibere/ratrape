@@ -101,8 +101,8 @@ function fromSeed(seed: Seed): Row {
 
 /** Les annonces publiées pendant la session s'ajoutent aux données d'exemple. */
 const created: Map<string, Row> = ((
-  globalThis as { __kilajeteCreated?: Map<string, Row> }
-).__kilajeteCreated ??= new Map());
+  globalThis as { __ratrapeCreated?: Map<string, Row> }
+).__ratrapeCreated ??= new Map());
 
 function allRows(): Row[] {
   return [...SEEDS.map(fromSeed), ...created.values()];

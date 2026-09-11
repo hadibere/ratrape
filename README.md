@@ -1,4 +1,4 @@
-# Kilajete
+# Ratrape
 
 Un habitant dépose un encombrant sur le trottoir pour la collecte municipale et le signale sur la carte du quartier avec une photo. Les voisins peuvent venir le récupérer gratuitement avant le passage du camion. Aucun compte, aucune messagerie : le dépôt prend moins d'une minute, au pouce.
 

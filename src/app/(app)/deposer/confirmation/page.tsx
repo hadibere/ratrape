@@ -19,7 +19,7 @@ export default async function ConfirmationPage() {
     ? `Votre ${label} est visible par le quartier. Le camion passe ${weekdayLabel(listing.pickupAt)} matin : d’ici là, un voisin peut ${pronoun} prendre.`
     : `Votre ${label} est visible par le quartier. Dès qu’un voisin passe, il peut ${pronoun} prendre.`;
 
-  const site = process.env.NEXT_PUBLIC_SITE_URL ?? "kilajete.fr";
+  const site = process.env.NEXT_PUBLIC_SITE_URL ?? "ratrape.fr";
   const manageUrl = `${site.replace(/^https?:\/\//, "")}/g/${token}`;
 
   return <DepositDone sentence={sentence} manageUrl={manageUrl} />;
