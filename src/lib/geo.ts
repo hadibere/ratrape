@@ -21,8 +21,12 @@ export function formatDistance(meters: number): string {
   return `${(meters / 1000).toFixed(1).replace(".", ",")} km`;
 }
 
-/** Temps de marche à environ 80 m par minute, au moins 1 minute. */
-export function formatWalk(meters: number): string {
+/** Au-delà, personne n'y va à pied : autant ne rien annoncer. */
+const WALKABLE_METERS = 5000;
+
+/** Temps de marche à environ 80 m par minute, ou null si c'est hors de portée. */
+export function formatWalk(meters: number): string | null {
+  if (meters > WALKABLE_METERS) return null;
   return `${Math.max(1, Math.round(meters / 80))} min à pied`;
 }
 
@@ -34,7 +38,13 @@ export function offsetMeters(from: LatLng, to: LatLng): { east: number; north: n
   };
 }
 
-/** Itinéraire piéton dans l'application de cartes du téléphone. */
-export function directionsUrl(point: LatLng): string {
-  return `https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=${point.lat},${point.lng}`;
+/**
+ * Itinéraire piéton sur OpenStreetMap, même fournisseur que nos tuiles.
+ *
+ * Un lien vers Google Maps est vidé de son texte par certains bloqueurs de
+ * publicité, et il expédie la position de l'habitant à un tiers.
+ */
+export function directionsUrl(from: LatLng, to: LatLng): string {
+  const route = `${from.lat},${from.lng};${to.lat},${to.lng}`;
+  return `https://www.openstreetmap.org/directions?engine=fossgis_osrm_foot&route=${encodeURIComponent(route)}`;
 }

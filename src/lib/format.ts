@@ -10,14 +10,26 @@ const WEEKDAYS: Record<string, number> = {
   "dim.": 7,
 };
 
-/** Heure de Paris pour un instant donné. Le format français ajoute « h », on lit la partie. */
-function parisHour(date: Date): number {
+/**
+ * Heure et minute à Paris, lues pièce par pièce.
+ *
+ * Indispensable pour l'hydratation : selon la version d'ICU, « fr-FR » rend
+ * « 6:00 », « 06:00 » ou « 6 h 00 ». Le serveur et le navigateur n'ont pas la
+ * même, donc on ne garde que les nombres et on compose le texte nous-mêmes.
+ */
+function parisTime(date: Date): { hour: number; minute: string } {
   const parts = new Intl.DateTimeFormat("fr-FR", {
     timeZone: TZ,
-    hour: "numeric",
-    hour12: false,
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
   }).formatToParts(date);
-  return Number(parts.find((p) => p.type === "hour")?.value ?? "12");
+  const part = (type: string) => parts.find((p) => p.type === type)?.value ?? "00";
+  return { hour: Number(part("hour")), minute: part("minute") };
+}
+
+function parisHour(date: Date): number {
+  return parisTime(date).hour;
 }
 
 /**
@@ -53,15 +65,11 @@ const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 const dayKey = (d: Date) =>
   new Intl.DateTimeFormat("fr-FR", { timeZone: TZ, dateStyle: "short" }).format(d);
 
-const clock = (d: Date) =>
-  new Intl.DateTimeFormat("fr-FR", {
-    timeZone: TZ,
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: false,
-  })
-    .format(d)
-    .replace(" h ", ":"); // certaines versions d'ICU rendent « 17 h 18 »
+/** « 9:15 » — sans zéro initial, identique sur le serveur et dans le navigateur. */
+const clock = (d: Date) => {
+  const { hour, minute } = parisTime(d);
+  return `${hour}:${minute}`;
+};
 
 /** « Aujourd'hui 9:15 », « Hier 18:20 », sinon « Mar. 9 sept. 18:20 ». */
 export function formatPosted(iso: string, now: Date = new Date()): string {
@@ -88,7 +96,7 @@ export function formatPickup(iso: string | null): string {
     day: "numeric",
     month: "short",
   }).format(d);
-  return `${cap(day)}, ${clock(d).replace(":", "h")}`;
+  return `${cap(day)}, ${clock(d).replace(":", "h")}`; // « Vendredi 18 sept., 6h00 »
 }
 
 /** « jeudi » — pour la phrase de confirmation. */

@@ -62,7 +62,7 @@ export function ListingDetail({ listing }: { listing: Listing }) {
             {listing.condition}
           </span>
           <span className="text-muted text-xs font-semibold">
-            {formatDistance(meters)} · {formatWalk(meters)}
+            {[formatDistance(meters), formatWalk(meters)].filter(Boolean).join(" · ")}
           </span>
         </div>
 
@@ -88,7 +88,7 @@ export function ListingDetail({ listing }: { listing: Listing }) {
 
       <div className="wide:px-6 wide:pb-[22px] border-line-soft bg-surface flex flex-none gap-2.5 border-t px-5 pt-3.5 pb-5">
         <a
-          href={directionsUrl(listing)}
+          href={directionsUrl(center, listing)}
           target="_blank"
           rel="noopener noreferrer"
           className="wide:h-[52px] bg-brand font-display hover:bg-brand-hover flex h-[54px] flex-1 items-center justify-center rounded-2xl text-base font-bold text-white"
