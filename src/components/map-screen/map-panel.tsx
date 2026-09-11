@@ -5,13 +5,15 @@ import Link from "next/link";
 import { EmptyState } from "@/components/listings/empty-state";
 import { FilterChips } from "@/components/listings/filter-chips";
 import { ListingCard, ListingRow } from "@/components/listings/listing-card";
-import { MapCanvas } from "@/components/map/map-canvas";
+import { LazyNeighborhoodMap } from "@/components/map/lazy-neighborhood-map";
 import { SavedCounter } from "@/components/map/saved-counter";
 import { useNeighborhood } from "@/components/shell/neighborhood-context";
+import { useIsWide } from "@/components/shell/use-is-wide";
 
 /** Contenu du panneau pour l'écran carte : en-tête, filtres, listes et dépôt. */
 export function MapPanel() {
   const { visible, filter, setFilter, center, savedThisMonth } = useNeighborhood();
+  const isWide = useIsWide();
 
   return (
     <>
@@ -30,12 +32,16 @@ export function MapPanel() {
       </div>
 
       {/* Sous 900 px la carte s'insère dans la colonne ; au-delà elle occupe la gauche */}
-      <MapCanvas
-        listings={visible.map((item) => item.listing)}
-        center={center}
-        variant="narrow"
-        className="wide:hidden min-h-[300px] flex-1"
-      />
+      <div className="wide:hidden bg-map min-h-[300px] flex-1">
+        {isWide === false ? (
+          <LazyNeighborhoodMap
+            listings={visible.map((item) => item.listing)}
+            center={center}
+            variant="narrow"
+            className="h-full w-full"
+          />
+        ) : null}
+      </div>
 
       <div className="scrl wide:flex hidden min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-6 py-4">
         {visible.length === 0 ? (

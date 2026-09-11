@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { MapCanvas } from "@/components/map/map-canvas";
+import { LazyNeighborhoodMap } from "@/components/map/lazy-neighborhood-map";
 import { SavedCounter } from "@/components/map/saved-counter";
 import { AppShell } from "@/components/shell/app-shell";
 import { NeighborhoodProvider, type NeighborhoodValue } from "./neighborhood-context";
+import { useIsWide } from "./use-is-wide";
 import { DEFAULT_CENTER, distanceMeters, type LatLng } from "@/lib/geo";
 import type { Filter, Listing } from "@/lib/types";
 
@@ -21,6 +22,7 @@ type NeighborhoodShellProps = {
  * de la carte à une fiche : seul le contenu du panneau change.
  */
 export function NeighborhoodShell({ listings, savedThisMonth, children }: NeighborhoodShellProps) {
+  const isWide = useIsWide();
   const [filter, setFilter] = useState<Filter>("Tout");
   const [center, setCenter] = useState<LatLng>(DEFAULT_CENTER);
 
@@ -55,15 +57,17 @@ export function NeighborhoodShell({ listings, savedThisMonth, children }: Neighb
       <AppShell
         map={
           <>
-            <MapCanvas
-              listings={value.visible.map((item) => item.listing)}
-              center={center}
-              variant="wide"
-              className="h-full w-full"
-            />
+            {isWide ? (
+              <LazyNeighborhoodMap
+                listings={value.visible.map((item) => item.listing)}
+                center={center}
+                variant="wide"
+                className="h-full w-full"
+              />
+            ) : null}
             <SavedCounter
               count={savedThisMonth}
-              className="bg-surface shadow-overlay absolute top-5 left-5 px-4 py-2.5 text-sm"
+              className="bg-surface shadow-overlay absolute top-5 left-5 z-10 px-4 py-2.5 text-sm"
             />
           </>
         }
