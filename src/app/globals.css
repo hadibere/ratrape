@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+@theme {
+  /* Couleurs (handoff Kilajete) */
+  --color-brand: #1f7a4d;
+  --color-brand-hover: #1a6942;
+  --color-brand-soft: #e4f0e6;
+  --color-brand-tint: #f1f8f2;
+  --color-ink: #16231c;
+  --color-muted: #6e7a70;
+  --color-label: #8a948c;
+  --color-page: #edeae2;
+  --color-surface: #fbfaf6;
+  --color-card: #ffffff;
+  --color-line: #e2ded3;
+  --color-line-soft: #efebe1;
+  --color-line-disabled: #c6cec3;
+  --color-btn-disabled: #c3cdc5;
+  --color-map: #e6ede4;
+  --color-building: #dce6d9;
+  --color-notice: #fff8e8;
+  --color-notice-ink: #8a7b4c;
+  --color-danger: #b04a2f;
+  --color-you: #2e7bd6;
+
+  /* Typographie */
+  --font-display: var(--font-quicksand), "Quicksand", system-ui, sans-serif;
+  --font-sans: var(--font-nunito), "Nunito", system-ui, sans-serif;
+  --font-mono: ui-monospace, Menlo, monospace;
+
+  /* Bascule unique */
+  --breakpoint-wide: 900px;
+
+  /* Ombres */
+  --shadow-cta: 0 8px 20px rgba(31, 122, 77, 0.3);
+  --shadow-card: 0 2px 6px rgba(22, 35, 28, 0.05);
+  --shadow-pin: 0 4px 12px rgba(22, 35, 28, 0.2);
+  --shadow-pin-wide: 0 6px 16px rgba(22, 35, 28, 0.2);
+  --shadow-overlay: 0 4px 14px rgba(22, 35, 28, 0.12);
+  --shadow-you: 0 0 0 8px rgba(46, 123, 214, 0.16);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-page);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+}
+
+a {
+  color: var(--color-brand);
+}
+a:hover {
+  color: var(--color-ink);
+}
+
+/* Scrollbars masquées (listes horizontales, panneaux) */
+.scrl {
+  scrollbar-width: none;
+}
+.scrl::-webkit-scrollbar {
+  display: none;
+}
+
+/* Photos factices : rayures diagonales (remplacées par les vraies photos) */
+.swatch-sofa {
+  background: repeating-linear-gradient(45deg, #e3dccb 0 9px, #d8d0bc 9px 18px);
+}
+.swatch-wood {
+  background: repeating-linear-gradient(45deg, #e7d8c3 0 9px, #dccab1 9px 18px);
+}
+.swatch-bike {
+  background: repeating-linear-gradient(45deg, #d9e3e8 0 9px, #c9d6dd 9px 18px);
+}
+.swatch-appl {
+  background: repeating-linear-gradient(45deg, #e4e7e2 0 9px, #d6dbd4 9px 18px);
+}
+.swatch-deco {
+  background: repeating-linear-gradient(45deg, #e8dfe6 0 9px, #dccfd9 9px 18px);
+}
+.swatch-bed {
+  background: repeating-linear-gradient(45deg, #e6e2d6 0 9px, #dad5c6 9px 18px);
+}
+.swatch-other {
+  background: repeating-linear-gradient(45deg, #e2e4e0 0 9px, #d4d7d2 9px 18px);
+}
+.swatch-photo-zone {
+  background: repeating-linear-gradient(45deg, #f1f3ee 0 10px, #e8ede5 10px 20px);
+}
+
+/* MapLibre : contrôles discrets */
+.maplibregl-ctrl-attrib {
+  font: 400 10px var(--font-sans);
+  background: rgba(251, 250, 246, 0.85) !important;
+}
+.maplibregl-ctrl-bottom-right {
+  z-index: 1;
+}
