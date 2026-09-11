@@ -33,3 +33,8 @@ export function offsetMeters(from: LatLng, to: LatLng): { east: number; north: n
     north: distanceMeters(from, { lat: to.lat, lng: from.lng }) * (to.lat >= from.lat ? 1 : -1),
   };
 }
+
+/** Itinéraire piéton dans l'application de cartes du téléphone. */
+export function directionsUrl(point: LatLng): string {
+  return `https://www.google.com/maps/dir/?api=1&travelmode=walking&destination=${point.lat},${point.lng}`;
+}

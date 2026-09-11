@@ -47,3 +47,46 @@ export function nextWeekdayAt6(weekday: number, from: Date = new Date()): Date {
   const offset = parisHour(noon) - 12;
   return new Date(Date.UTC(year, month - 1, day + delta, 6 - offset, 0, 0));
 }
+
+const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+const dayKey = (d: Date) =>
+  new Intl.DateTimeFormat("fr-FR", { timeZone: TZ, dateStyle: "short" }).format(d);
+
+const clock = (d: Date) =>
+  new Intl.DateTimeFormat("fr-FR", {
+    timeZone: TZ,
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: false,
+  })
+    .format(d)
+    .replace(" h ", ":"); // certaines versions d'ICU rendent « 17 h 18 »
+
+/** « Aujourd'hui 9:15 », « Hier 18:20 », sinon « Mar. 9 sept. 18:20 ». */
+export function formatPosted(iso: string, now: Date = new Date()): string {
+  const d = new Date(iso);
+  const key = dayKey(d);
+  if (key === dayKey(now)) return `Aujourd'hui ${clock(d)}`;
+  if (key === dayKey(new Date(now.getTime() - 86_400_000))) return `Hier ${clock(d)}`;
+  const day = new Intl.DateTimeFormat("fr-FR", {
+    timeZone: TZ,
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  }).format(d);
+  return `${cap(day)} ${clock(d)}`;
+}
+
+/** « Jeudi 17 sept., 6h00 ». */
+export function formatPickup(iso: string | null): string {
+  if (!iso) return "Date inconnue";
+  const d = new Date(iso);
+  const day = new Intl.DateTimeFormat("fr-FR", {
+    timeZone: TZ,
+    weekday: "long",
+    day: "numeric",
+    month: "short",
+  }).format(d);
+  return `${cap(day)}, ${clock(d).replace(":", "h")}`;
+}

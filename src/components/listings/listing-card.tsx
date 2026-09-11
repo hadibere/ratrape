@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { formatDistance } from "@/lib/geo";
 import { swatchClass, type Listing } from "@/lib/types";
 
@@ -6,10 +7,15 @@ type CardProps = {
   distanceMeters: number;
 };
 
+const href = (listing: Listing) => `/objet/${listing.id}` as const;
+
 /** Carte de la liste horizontale, sous 900 px. */
 export function ListingCard({ listing, distanceMeters }: CardProps) {
   return (
-    <article className="border-line bg-card shadow-card w-[158px] flex-none overflow-hidden rounded-2xl border">
+    <Link
+      href={href(listing)}
+      className="border-line bg-card shadow-card w-[158px] flex-none overflow-hidden rounded-2xl border"
+    >
       <span className={`border-line block h-[78px] border-b ${swatchClass(listing.category)}`} />
       <span className="block px-[11px] pt-[9px] pb-[11px]">
         <span className="font-display text-ink block text-sm/[1.2] font-bold">{listing.name}</span>
@@ -17,14 +23,17 @@ export function ListingCard({ listing, distanceMeters }: CardProps) {
           {formatDistance(distanceMeters)} · {listing.condition}
         </span>
       </span>
-    </article>
+    </Link>
   );
 }
 
 /** Rangée de la liste verticale, à partir de 900 px. */
 export function ListingRow({ listing, distanceMeters }: CardProps) {
   return (
-    <article className="border-line bg-card flex items-center gap-3 rounded-2xl border p-2.5">
+    <Link
+      href={href(listing)}
+      className="border-line bg-card flex items-center gap-3 rounded-2xl border p-2.5"
+    >
       <span className={`h-[66px] w-[76px] flex-none rounded-xl ${swatchClass(listing.category)}`} />
       <span className="block min-w-0">
         <span className="font-display text-ink block text-[15px]/[1.2] font-bold">
@@ -35,6 +44,6 @@ export function ListingRow({ listing, distanceMeters }: CardProps) {
           {formatDistance(distanceMeters)} · {listing.condition}
         </span>
       </span>
-    </article>
+    </Link>
   );
 }

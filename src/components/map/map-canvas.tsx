@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { offsetMeters, type LatLng } from "@/lib/geo";
 import { swatchClass, type Listing } from "@/lib/types";
 
@@ -31,7 +32,7 @@ type MapCanvasProps = {
 export function MapCanvas({ listings, center, variant, className = "" }: MapCanvasProps) {
   const wide = variant === "wide";
   const span = wide ? 1800 : 1200;
-  const pin = wide ? "h-[58px] w-[58px] shadow-pin-wide" : "h-[52px] w-[52px] shadow-pin";
+  const pinSize = wide ? "h-[58px] w-[58px] shadow-pin-wide" : "h-[52px] w-[52px] shadow-pin";
 
   return (
     <div className={`bg-map relative overflow-hidden ${className}`}>
@@ -46,23 +47,22 @@ export function MapCanvas({ listings, center, variant, className = "" }: MapCanv
       <div className="bg-building absolute top-[24%] left-[70%] h-[20%] w-[22%] rounded-xl" />
 
       {/* Objets déposés */}
-      {listings.map((listing) => {
-        const pos = project(center, listing, span);
-        return (
-          <div
-            key={listing.id}
-            className="absolute flex -translate-x-1/2 -translate-y-full flex-col items-center"
-            style={pos}
+      {listings.map((listing) => (
+        <Link
+          key={listing.id}
+          href={`/objet/${listing.id}`}
+          aria-label={listing.name}
+          style={project(center, listing, span)}
+          className="absolute flex -translate-x-1/2 -translate-y-full flex-col items-center"
+        >
+          <span
+            className={`border-brand text-ink flex items-center justify-center overflow-hidden rounded-full border-[3px] text-center font-mono text-[10px]/[1.1] font-bold ${pinSize} ${swatchClass(listing.category)}`}
           >
-            <span
-              className={`border-brand text-ink flex items-center justify-center overflow-hidden rounded-full border-[3px] text-center font-mono text-[10px]/[1.1] font-bold ${pin} ${swatchClass(listing.category)}`}
-            >
-              {pinTag(listing.name)}
-            </span>
-            <span className="bg-brand -mt-1.5 h-2.5 w-2.5 rotate-45 rounded-[2px]" />
-          </div>
-        );
-      })}
+            {pinTag(listing.name)}
+          </span>
+          <span className="bg-brand -mt-1.5 h-2.5 w-2.5 rotate-45 rounded-[2px]" />
+        </Link>
+      ))}
 
       {/* Position de l'utilisateur */}
       <div className="border-surface bg-you shadow-you absolute top-1/2 left-1/2 h-[18px] w-[18px] -translate-x-1/2 -translate-y-1/2 rounded-full border-[3px]" />
