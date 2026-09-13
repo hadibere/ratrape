@@ -95,3 +95,42 @@ export function zoneFromDate(iso: string | null): Zone | null {
   if (nth === ZONE_DETAILS.Parc.weekOfMonth) return "Parc";
   return null;
 }
+
+/**
+ * Jours fériés susceptibles de tomber un jour de collecte.
+ *
+ * Le 2e mercredi tombe entre le 8 et le 14, le 4e entre le 22 et le 28. Seuls
+ * quatre jours fériés français entrent dans ces fenêtres ; les fêtes mobiles
+ * sont toutes des lundis ou des jeudis, donc hors sujet.
+ */
+const HOLIDAYS: [month: number, day: number, name: string][] = [
+  [5, 8, "Victoire 1945"],
+  [7, 14, "Fête nationale"],
+  [11, 11, "Armistice"],
+  [12, 25, "Noël"],
+];
+
+/** Nom du jour férié si la collecte tombe dessus, sinon null. */
+export function holidayOn(date: Date): string | null {
+  const parts = new Intl.DateTimeFormat("fr-FR", {
+    timeZone: "Europe/Paris",
+    month: "numeric",
+    day: "numeric",
+  }).formatToParts(date);
+  const value = (type: string) => Number(parts.find((part) => part.type === type)?.value ?? "0");
+  const month = value("month");
+  const day = value("day");
+  return HOLIDAYS.find(([m, d]) => m === month && d === day)?.[2] ?? null;
+}
+
+/**
+ * La ville ne publie pas ce qu'elle fait d'une collecte tombant un jour férié.
+ * Plutôt que d'inventer une règle, on affiche la date prévue en signalant
+ * qu'elle demande confirmation.
+ */
+export function holidayWarning(date: Date): string | null {
+  const holiday = holidayOn(date);
+  return holiday
+    ? `${holiday} : jour férié, la collecte est peut-être décalée. À confirmer auprès de la ville.`
+    : null;
+}

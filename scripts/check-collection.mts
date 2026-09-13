@@ -1,5 +1,12 @@
 /** Vérifie le calendrier de collecte de Maisons-Laffitte. `pnpm check:collection` */
-import { formatCollectionDay, formatEve, nextCollection, zoneFromDate } from "@/lib/collection";
+import {
+  formatCollectionDay,
+  formatEve,
+  holidayOn,
+  holidayWarning,
+  nextCollection,
+  zoneFromDate,
+} from "@/lib/collection";
 
 const ok = (label: string, condition: boolean) => console.log(condition ? "OK  " : "ÉCHEC", label);
 const at = (iso: string) => new Date(iso);
@@ -65,4 +72,36 @@ for (let i = 0; i < 60; i++) {
   }
 }
 ok("cohérent sur cinq ans, changements d'heure compris", allGood);
+// Jours fériés tombant un jour de collecte : on ne les corrige pas, on les signale.
+ok(
+  "11 novembre 2026 repéré comme férié",
+  holidayOn(nextCollection("Ville", at("2026-11-01T10:00:00Z"))) === "Armistice",
+);
+ok(
+  "un mercredi ordinaire n'alerte pas",
+  holidayWarning(nextCollection("Parc", at("2026-09-01T10:00:00Z"))) === null,
+);
+ok(
+  "le message invite à confirmer",
+  (holidayWarning(nextCollection("Ville", at("2026-11-01T10:00:00Z"))) ?? "").includes("confirmer"),
+);
+
+// Sur vingt ans, combien de collectes tombent un jour férié ?
+const touched: string[] = [];
+for (let year = 2026; year < 2046; year++) {
+  for (let month = 0; month < 12; month++) {
+    for (const zone of ["Ville", "Parc"] as const) {
+      const date = nextCollection(zone, new Date(Date.UTC(year, month, 1)));
+      const holiday = holidayOn(date);
+      if (holiday && date.getUTCFullYear() === year) {
+        touched.push(`${formatCollectionDay(date)} ${year} (${zone}, ${holiday})`);
+      }
+    }
+  }
+}
+const uniques = [...new Set(touched)];
+console.log(`     ${uniques.length} collectes fériées d'ici 2046, dont :`);
+for (const line of uniques.slice(0, 4)) console.log("       ", line);
+ok("des collectes fériées existent bien", uniques.length > 0);
+
 process.exit(0);

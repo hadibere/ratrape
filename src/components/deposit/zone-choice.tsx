@@ -4,6 +4,7 @@ import { ChoiceButtons } from "@/components/deposit/choice-buttons";
 import {
   formatCollectionDay,
   formatEve,
+  holidayWarning,
   nextCollection,
   ZONE_DETAILS,
   ZONES,
@@ -17,6 +18,7 @@ import {
  */
 export function ZoneChoice({ value, onChange }: { value: Zone; onChange: (zone: Zone) => void }) {
   const collection = nextCollection(value);
+  const warning = holidayWarning(collection);
 
   return (
     <>
@@ -27,6 +29,7 @@ export function ZoneChoice({ value, onChange }: { value: Zone; onChange: (zone: 
       <p className="bg-notice text-notice-ink mt-2.5 rounded-2xl px-3.5 py-3 text-[13px]/[1.45] font-semibold">
         Prochaine collecte {formatCollectionDay(collection).toLowerCase()}. Sortez l’objet{" "}
         {formatEve(collection)}.
+        {warning ? <span className="text-danger block pt-1.5">{warning}</span> : null}
       </p>
     </>
   );

@@ -246,7 +246,14 @@ export function isInsideCommune(point: LatLng): boolean {
   return inside;
 }
 
-/** Échappatoire de développement : publier depuis ailleurs que la commune. */
+/**
+ * Le périmètre s'applique-t-il ?
+ *
+ * NEXT_PUBLIC_RATRAPE_ANYWHERE permet de publier depuis ailleurs pendant le
+ * développement. En production la restriction tient quoi qu'il arrive : une
+ * variable oubliée sur un serveur ne doit pas ouvrir Ratrape à la France entière.
+ */
 export function locationRestricted(): boolean {
+  if (process.env.NODE_ENV === "production") return true;
   return process.env.NEXT_PUBLIC_RATRAPE_ANYWHERE !== "1";
 }

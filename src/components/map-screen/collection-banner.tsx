@@ -1,4 +1,4 @@
-import { formatCollectionDay, formatEve, nextCollection, ZONES } from "@/lib/collection";
+import { formatCollectionDay, formatEve, holidayOn, nextCollection, ZONES } from "@/lib/collection";
 
 /**
  * À Maisons-Laffitte la collecte est mensuelle, et les objets ne sortent que la
@@ -18,6 +18,9 @@ export function CollectionBanner({ className = "" }: { className?: string }) {
       {next.map(({ zone, date }) => (
         <p key={zone} className="text-ink mt-1 text-[13px] font-semibold">
           {zone} · {formatCollectionDay(date).toLowerCase()}
+          {holidayOn(date) ? (
+            <span className="text-danger font-semibold"> · jour férié, à confirmer</span>
+          ) : null}
         </p>
       ))}
       <p className="text-muted mt-1.5 text-xs/[1.45]">

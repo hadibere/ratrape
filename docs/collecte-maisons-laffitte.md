@@ -40,9 +40,9 @@ Un dépôt hors de ces règles est puni de **135 € d'amende**.
 1. **Limites des quatre secteurs.** Inconnues, d'où la question posée à l'habitant.
    Avec une carte ou une liste de rues, la zone se déduirait de l'adresse et le
    champ disparaîtrait.
-2. **Jours fériés.** Le calcul ne connaît aucune exception. Le 2e mercredi de
-   novembre 2026 tombe le 11 novembre, jour férié : la date affichée pour la zone
-   Ville sera fausse si la collecte est décalée.
+2. **Jours fériés.** Le calcul ne décale rien, faute de connaître la règle, mais
+   il signale les collectes tombant un jour férié et invite à confirmer auprès de
+   la ville. Dix cas d'ici 2046, le premier le 11 novembre 2026 pour la zone Ville.
 3. **Horaire de passage.** Non publié. Six heures du matin est retenu par
    convention, ce qui détermine à partir de quand une annonce est considérée comme
    ramassée.
