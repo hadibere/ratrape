@@ -28,3 +28,6 @@ export type TakenState =
   /** Quelqu'un d'autre l'avait déjà déclaré, ou le camion est passé. */
   | { status: "already" }
   | { status: "error"; message: string };
+
+/** Cookie court signalant que la photo n'a pas pu être enregistrée. */
+export const PHOTO_FAILED_COOKIE = "ratrape_photo";

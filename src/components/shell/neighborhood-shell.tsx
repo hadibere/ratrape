@@ -4,7 +4,11 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { LazyNeighborhoodMap } from "@/components/map/lazy-neighborhood-map";
 import { SavedCounter } from "@/components/map/saved-counter";
 import { AppShell } from "@/components/shell/app-shell";
-import { NeighborhoodProvider, type NeighborhoodValue } from "./neighborhood-context";
+import {
+  NeighborhoodProvider,
+  type GeoStatus,
+  type NeighborhoodValue,
+} from "./neighborhood-context";
 import { useIsWide } from "./use-is-wide";
 import { DEFAULT_CENTER, distanceMeters, type LatLng } from "@/lib/geo";
 import type { Filter, Listing } from "@/lib/types";
@@ -25,17 +29,27 @@ export function NeighborhoodShell({ listings, savedThisMonth, children }: Neighb
   const isWide = useIsWide();
   const [filter, setFilter] = useState<Filter>("Tout");
   const [center, setCenter] = useState<LatLng>(DEFAULT_CENTER);
+  const [geo, setGeo] = useState<GeoStatus>("pending");
+  const [geoAttempt, setGeoAttempt] = useState(0);
 
-  // Position réelle si l'utilisateur l'autorise, sinon on garde le centre du quartier.
+  // Position réelle si l'habitant l'autorise, sinon le centre du quartier, mais
+  // en le disant : sans ça, il verrait des distances absurdes sans comprendre.
   useEffect(() => {
-    if (!("geolocation" in navigator)) return;
+    if (!("geolocation" in navigator)) {
+      // Reporté d'un tour : changer d'état pendant l'effet relancerait un rendu en cascade.
+      const timer = setTimeout(() => setGeo("unavailable"), 0);
+      return () => clearTimeout(timer);
+    }
     const id = navigator.geolocation.watchPosition(
-      (pos) => setCenter({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-      () => undefined,
+      (position) => {
+        setCenter({ lat: position.coords.latitude, lng: position.coords.longitude });
+        setGeo("granted");
+      },
+      (error) => setGeo(error.code === error.PERMISSION_DENIED ? "denied" : "unavailable"),
       { enableHighAccuracy: true, maximumAge: 30_000, timeout: 10_000 },
     );
     return () => navigator.geolocation.clearWatch(id);
-  }, []);
+  }, [geoAttempt]);
 
   const value = useMemo<NeighborhoodValue>(() => {
     const nearby = listings
@@ -49,8 +63,23 @@ export function NeighborhoodShell({ listings, savedThisMonth, children }: Neighb
           ? nearby.filter((item) => item.meters < 500)
           : nearby.filter((item) => item.listing.category === filter);
 
-    return { visible, filter, setFilter, center, savedThisMonth };
-  }, [listings, center, filter, savedThisMonth]);
+    return {
+      visible,
+      filter,
+      setFilter,
+      center,
+      geo,
+      retryGeo: () => {
+        setGeo("pending");
+        setGeoAttempt((attempt) => attempt + 1);
+      },
+      savedThisMonth,
+      total: listings.length,
+      // Calculé sur tout le quartier : c'est ce qui permet de dire « le plus
+      // proche est à 3 km » quand la liste filtrée ne renvoie rien.
+      nearestMeters: nearby[0]?.meters ?? null,
+    };
+  }, [listings, center, filter, geo, savedThisMonth]);
 
   return (
     <NeighborhoodProvider value={value}>

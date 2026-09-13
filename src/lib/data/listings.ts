@@ -12,8 +12,14 @@ import type { Category, Condition, Listing, PickupChoice } from "@/lib/types";
  */
 const SAVED_BASE = 36;
 
-/** Vue publique : ni l'empreinte du jeton, ni la date de récupération, ne sortent d'ici. */
+/**
+ * Vue publique : ni l'empreinte du jeton, ni la date de récupération, ne sortent
+ * d'ici. Une annonce dont le camion est passé est présentée comme ramassée,
+ * même si personne n'a pensé à le signaler.
+ */
 function publicView(row: ListingRow): Listing {
+  const collected =
+    row.status === "available" && row.pickupAt !== null && row.pickupAt.getTime() < Date.now();
   return {
     id: row.id,
     photoUrl: row.photoUrl,
@@ -26,7 +32,7 @@ function publicView(row: ListingRow): Listing {
     lng: row.lng,
     postedAt: row.postedAt.toISOString(),
     pickupAt: row.pickupAt ? row.pickupAt.toISOString() : "",
-    status: row.status as Listing["status"],
+    status: collected ? "collected" : (row.status as Listing["status"]),
   };
 }
 

@@ -19,7 +19,8 @@
     "storage:setup": "node --env-file-if-exists=.env.local ./node_modules/tsx/dist/cli.mjs --conditions=react-server scripts/setup-storage.mts",
     "storage:check": "node --env-file-if-exists=.env.local ./node_modules/tsx/dist/cli.mjs --conditions=react-server scripts/check-photo.mts",
     "db:photo": "node --env-file-if-exists=.env.local ./node_modules/tsx/dist/cli.mjs --conditions=react-server scripts/check-deposit-photo.mts",
-    "db:manage": "node --env-file-if-exists=.env.local ./node_modules/tsx/dist/cli.mjs --conditions=react-server scripts/check-manage.mts"
+    "db:manage": "node --env-file-if-exists=.env.local ./node_modules/tsx/dist/cli.mjs --conditions=react-server scripts/check-manage.mts",
+    "db:states": "node --env-file-if-exists=.env.local ./node_modules/tsx/dist/cli.mjs --conditions=react-server scripts/check-states.mts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",

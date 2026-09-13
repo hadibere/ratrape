@@ -1,13 +1,15 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { MANAGE_COOKIE } from "@/lib/deposit";
+import { MANAGE_COOKIE, PHOTO_FAILED_COOKIE } from "@/lib/deposit";
 import { DepositDone } from "@/components/deposit/deposit-done";
 import { getListingByToken } from "@/lib/data/listings";
 import { weekdayLabel } from "@/lib/format";
 import { CATEGORY_PHRASE } from "@/lib/types";
 
 export default async function ConfirmationPage() {
-  const token = (await cookies()).get(MANAGE_COOKIE)?.value;
+  const cookieStore = await cookies();
+  const token = cookieStore.get(MANAGE_COOKIE)?.value;
+  const photoFailed = cookieStore.get(PHOTO_FAILED_COOKIE)?.value === "1";
   if (!token) redirect("/");
 
   const listing = await getListingByToken(token);
@@ -22,5 +24,12 @@ export default async function ConfirmationPage() {
   const site = process.env.NEXT_PUBLIC_SITE_URL ?? "ratrape.fr";
   const manageUrl = `${site.replace(/^https?:\/\//, "")}/g/${token}`;
 
-  return <DepositDone sentence={sentence} manageUrl={manageUrl} managePath={`/g/${token}`} />;
+  return (
+    <DepositDone
+      sentence={sentence}
+      manageUrl={manageUrl}
+      managePath={`/g/${token}`}
+      photoFailed={photoFailed}
+    />
+  );
 }

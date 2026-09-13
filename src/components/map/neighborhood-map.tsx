@@ -53,6 +53,7 @@ export function NeighborhoodMap({
   const userMarkerRef = useRef<Marker | null>(null);
   const followUser = useRef(true);
   const [anchors, setAnchors] = useState<{ id: string; element: HTMLElement }[]>([]);
+  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
 
   // Une seule création : la carte survit aux changements d'écran sur desktop.
   useEffect(() => {
@@ -77,9 +78,13 @@ export function NeighborhoodMap({
       followUser.current = false;
     });
 
+    map.on("load", () => setStatus("ready"));
+
     // Les échecs de tuiles ou de style sont silencieux par défaut : on les montre.
+    // Seul un style absent empêche vraiment d'afficher quoi que ce soit.
     map.on("error", (event) => {
       console.error("[carte]", event.error?.message ?? event);
+      if (!map.isStyleLoaded()) setStatus("error");
     });
 
     // Le conteneur prend sa taille après le montage : sans ça le canevas reste figé.
@@ -137,7 +142,16 @@ export function NeighborhoodMap({
     variant === "wide" ? "h-[58px] w-[58px] shadow-pin-wide" : "h-[52px] w-[52px] shadow-pin";
 
   return (
-    <div ref={containerRef} className={`bg-map ${className}`}>
+    <div ref={containerRef} className={`bg-map relative ${className}`}>
+      {status !== "ready" ? (
+        <div className="bg-map absolute inset-0 z-10 flex items-center justify-center p-6 text-center">
+          <p className="text-muted text-[13px]/[1.5] font-semibold">
+            {status === "loading"
+              ? "Chargement de la carte…"
+              : "La carte ne répond pas. Les objets proches restent visibles dans la liste."}
+          </p>
+        </div>
+      ) : null}
       {anchors.map(({ id, element }) => {
         const listing = byId.get(id);
         if (!listing) return null;

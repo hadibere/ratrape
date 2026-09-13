@@ -4,7 +4,12 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createListing, setPhotoUrl } from "@/lib/data/listings";
-import { depositSchema, MANAGE_COOKIE, type DepositState } from "@/lib/deposit";
+import {
+  depositSchema,
+  MANAGE_COOKIE,
+  PHOTO_FAILED_COOKIE,
+  type DepositState,
+} from "@/lib/deposit";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { generateToken } from "@/lib/token";
 import { uploadPhoto } from "@/lib/storage";
@@ -34,10 +39,15 @@ export async function publishListing(
   // La photo suit la création : une annonce sans image reste utile, et un envoi
   // raté ne doit pas faire perdre à l'habitant tout ce qu'il vient de saisir.
   const photo = formData.get("photo");
+  let photoFailed = false;
   if (photo instanceof File && photo.size > 0) {
     const upload = await uploadPhoto(photo, listing.id);
-    if (upload.ok) await setPhotoUrl(listing.id, upload.url);
-    else console.warn(`[photo] annonce ${listing.id} publiée sans image (${upload.reason})`);
+    if (upload.ok) {
+      await setPhotoUrl(listing.id, upload.url);
+    } else {
+      photoFailed = true;
+      console.warn(`[photo] annonce ${listing.id} publiée sans image (${upload.reason})`);
+    }
   }
 
   const cookieStore = await cookies();
@@ -48,6 +58,16 @@ export async function publishListing(
     path: "/deposer/confirmation",
     maxAge: 60 * 15,
   });
+
+  if (photoFailed) {
+    cookieStore.set(PHOTO_FAILED_COOKIE, "1", {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/deposer/confirmation",
+      maxAge: 60 * 15,
+    });
+  }
 
   revalidatePath("/");
   redirect("/deposer/confirmation");

@@ -10,9 +10,11 @@ type DepositDoneProps = {
   manageUrl: string;
   /** Chemin interne correspondant, pour ouvrir la page sans quitter le site. */
   managePath: `/g/${string}`;
+  /** L'annonce est en ligne, mais l'image n'a pas pu être enregistrée. */
+  photoFailed: boolean;
 };
 
-export function DepositDone({ sentence, manageUrl, managePath }: DepositDoneProps) {
+export function DepositDone({ sentence, manageUrl, managePath, photoFailed }: DepositDoneProps) {
   const [copied, setCopied] = useState(false);
 
   const copy = async () => {
@@ -34,6 +36,13 @@ export function DepositDone({ sentence, manageUrl, managePath }: DepositDoneProp
         Votre annonce est en ligne
       </h1>
       <p className="text-muted mt-2.5 text-[15px]/[1.5]">{sentence}</p>
+
+      {photoFailed ? (
+        <p className="bg-notice text-notice-ink mt-4 rounded-2xl px-3.5 py-3 text-left text-[13px]/[1.45] font-semibold">
+          Votre photo n’a pas pu être enregistrée : l’annonce est en ligne sans image. Les voisins
+          se déplacent surtout quand ils voient l’objet, n’hésitez pas à la redéposer.
+        </p>
+      ) : null}
 
       <div className="border-line bg-card wide:mt-5 mt-[22px] rounded-2xl border p-3.5 text-left">
         <div className="text-label text-[11px] font-semibold tracking-[0.06em] uppercase">

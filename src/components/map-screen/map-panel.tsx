@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import { EmptyState } from "@/components/listings/empty-state";
+import { GeoBanner } from "@/components/map-screen/geo-banner";
 import { FilterChips } from "@/components/listings/filter-chips";
 import { ListingCard, ListingRow } from "@/components/listings/listing-card";
 import { LazyNeighborhoodMap } from "@/components/map/lazy-neighborhood-map";
@@ -12,7 +13,8 @@ import { useIsWide } from "@/components/shell/use-is-wide";
 
 /** Contenu du panneau pour l'écran carte : en-tête, filtres, listes et dépôt. */
 export function MapPanel() {
-  const { visible, filter, setFilter, center, savedThisMonth } = useNeighborhood();
+  const { visible, filter, setFilter, center, savedThisMonth, total, nearestMeters } =
+    useNeighborhood();
   const isWide = useIsWide();
 
   return (
@@ -29,6 +31,7 @@ export function MapPanel() {
           className="wide:hidden bg-brand-soft mt-3 px-3.5 py-2 text-[13px]"
         />
         <FilterChips value={filter} onChange={setFilter} className="wide:mt-3.5 mt-3 pb-0.5" />
+        <GeoBanner className="mt-3" />
       </div>
 
       {/* Sous 900 px la carte s'insère dans la colonne ; au-delà elle occupe la gauche */}
@@ -45,7 +48,7 @@ export function MapPanel() {
 
       <div className="scrl wide:flex hidden min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-6 py-4">
         {visible.length === 0 ? (
-          <EmptyState filter={filter} />
+          <EmptyState filter={filter} total={total} nearestMeters={nearestMeters} />
         ) : (
           visible.map(({ listing, meters }) => (
             <ListingRow key={listing.id} listing={listing} distanceMeters={meters} />
@@ -56,7 +59,12 @@ export function MapPanel() {
       <div className="wide:border-line-soft wide:px-6 wide:pt-3.5 wide:pb-[22px] bg-surface wide:border-t flex-none pt-3 pb-[18px]">
         <div className="scrl wide:hidden flex gap-2.5 overflow-x-auto px-5 pb-3">
           {visible.length === 0 ? (
-            <EmptyState filter={filter} className="bg-card w-full" />
+            <EmptyState
+              filter={filter}
+              total={total}
+              nearestMeters={nearestMeters}
+              className="bg-card w-full"
+            />
           ) : (
             visible.map(({ listing, meters }) => (
               <ListingCard key={listing.id} listing={listing} distanceMeters={meters} />
