@@ -10,10 +10,10 @@ spécifiques. Relevé le 13 septembre 2026.
 
 Les encombrants sont collectés **une fois par mois, le mercredi**, selon deux zones.
 
-| Zone | Secteurs | Jour |
-|---|---|---|
-| Ville | Grand-Maisons, Longueil | 2e mercredi du mois |
-| Parc | Albine-Château, Napoléon-Charlemagne | 4e mercredi du mois |
+| Zone  | Secteurs                             | Jour                |
+| ----- | ------------------------------------ | ------------------- |
+| Ville | Grand-Maisons, Longueil              | 2e mercredi du mois |
+| Parc  | Albine-Château, Napoléon-Charlemagne | 4e mercredi du mois |
 
 Les objets doivent être **déposés la veille au soir**.
 

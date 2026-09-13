@@ -15,8 +15,8 @@ const listing = await createListing({
   condition: "Bon état",
   address: "12 rue de la Photo",
   spot: "",
-  lat: 43.6,
-  lng: 3.88,
+  lat: 48.9489,
+  lng: 2.1449,
   zone: "Ville",
   manageToken: generateToken(),
 });

@@ -11,6 +11,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { COMMUNE, COMMUNE_GEOJSON, OUTSIDE_COMMUNE_GEOJSON } from "@/lib/commune";
 import type { LatLng } from "@/lib/geo";
 import { swatchClass, type Listing } from "@/lib/types";
 
@@ -21,6 +22,9 @@ import { swatchClass, type Listing } from "@/lib/types";
  * `scripts/copy-maplibre-worker.mjs` le dépose.
  */
 setWorkerUrl("/maplibre/maplibre-gl-worker.mjs");
+
+/** Marge autour de la commune, en degrés : environ 800 m. */
+const MARGIN = 0.008;
 
 /** Fond de carte libre, sans clé d'API. */
 const STYLE_URL = "https://tiles.openfreemap.org/styles/positron";
@@ -51,7 +55,6 @@ export function NeighborhoodMap({
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
   const userMarkerRef = useRef<Marker | null>(null);
-  const followUser = useRef(true);
   const [anchors, setAnchors] = useState<{ id: string; element: HTMLElement }[]>([]);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
 
@@ -63,8 +66,20 @@ export function NeighborhoodMap({
     const map = new MapLibreMap({
       container,
       style: STYLE_URL,
-      center: [center.lng, center.lat],
-      zoom: 15,
+      // La commune entière plutôt que la position de l'habitant : Ratrape
+      // couvre une ville, on la montre en entier dès l'ouverture.
+      bounds: [
+        [COMMUNE.bounds.west, COMMUNE.bounds.south],
+        [COMMUNE.bounds.east, COMMUNE.bounds.north],
+      ],
+      fitBoundsOptions: { padding: 28 },
+      // On ne s'éloigne pas de la ville : la marge laisse juste voir les rues
+      // limitrophes, utiles pour se repérer.
+      maxBounds: [
+        [COMMUNE.bounds.west - MARGIN, COMMUNE.bounds.south - MARGIN],
+        [COMMUNE.bounds.east + MARGIN, COMMUNE.bounds.north + MARGIN],
+      ],
+      minZoom: 12,
       attributionControl: false,
       dragRotate: false,
       pitchWithRotate: false,
@@ -73,12 +88,30 @@ export function NeighborhoodMap({
     map.addControl(new AttributionControl({ compact: true, customAttribution: ATTRIBUTION }));
     map.addControl(new NavigationControl({ showCompass: false }), "bottom-right");
 
-    // Dès que l'habitant déplace la carte, on arrête de le recentrer.
-    map.on("dragstart", () => {
-      followUser.current = false;
+    map.on("load", () => {
+      // Limite communale : au-delà, Ratrape ne connaît ni le calendrier ni les règles.
+      map.addSource("commune", { type: "geojson", data: COMMUNE_GEOJSON });
+      map.addSource("hors-commune", { type: "geojson", data: OUTSIDE_COMMUNE_GEOJSON });
+      // Tout ce qui n'est pas la commune est voilé : d'un coup d'œil, on voit
+      // jusqu'où va Ratrape sans avoir à lire quoi que ce soit.
+      map.addLayer({
+        id: "hors-commune-fill",
+        type: "fill",
+        source: "hors-commune",
+        paint: { "fill-color": "#16231C", "fill-opacity": 0.22 },
+      });
+      map.addLayer({
+        id: "commune-outline",
+        type: "line",
+        source: "commune",
+        paint: {
+          "line-color": "#1F7A4D",
+          "line-width": 2.5,
+          "line-dasharray": [2, 2],
+        },
+      });
+      setStatus("ready");
     });
-
-    map.on("load", () => setStatus("ready"));
 
     // Les échecs de tuiles ou de style sont silencieux par défaut : on les montre.
     // Seul un style absent empêche vraiment d'afficher quoi que ce soit.
@@ -109,10 +142,9 @@ export function NeighborhoodMap({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // La position de l'utilisateur bouge : on déplace le point, et la vue tant qu'il n'a pas navigué.
+  // Seul le point bleu suit l'habitant : la vue reste sur la commune.
   useEffect(() => {
     userMarkerRef.current?.setLngLat([center.lng, center.lat]);
-    if (followUser.current) mapRef.current?.easeTo({ center: [center.lng, center.lat] });
   }, [center]);
 
   // Un ancrage vide par annonce ; le contenu du pin est rendu par React dans ce nœud.

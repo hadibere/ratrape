@@ -25,8 +25,8 @@ const listing = await createListing({
   condition: "Correct",
   address: "4 rue de la Gestion",
   spot: "Sous le porche",
-  lat: 43.6,
-  lng: 3.88,
+  lat: 48.9489,
+  lng: 2.1449,
   zone: "Ville",
   manageToken: token,
 });
@@ -79,8 +79,8 @@ const taken = await createListing({
   condition: "Bon état",
   address: "5 rue de la Gestion",
   spot: "",
-  lat: 43.6,
-  lng: 3.88,
+  lat: 48.9489,
+  lng: 2.1449,
   zone: "Ville",
   manageToken: second,
 });

@@ -9,6 +9,7 @@ import { ChoiceButtons } from "@/components/deposit/choice-buttons";
 import { ZoneChoice } from "@/components/deposit/zone-choice";
 import { useNeighborhood } from "@/components/shell/neighborhood-context";
 import { FINE_EUROS, LIMITS, WEEE_NOTICE, type Zone } from "@/lib/collection";
+import { COMMUNE, isInsideCommune, locationRestricted } from "@/lib/commune";
 import { CATEGORIES, CONDITIONS, type Category, type Condition } from "@/lib/types";
 
 const SectionTitle = ({ children }: { children: string }) => (
@@ -109,7 +110,8 @@ export function DepositForm() {
     setAddress(value);
   };
 
-  const ready = rule && address.trim().length >= 3 && photo !== null && !preparing;
+  const outside = locationRestricted() && !isInsideCommune(center);
+  const ready = rule && address.trim().length >= 3 && photo !== null && !preparing && !outside;
 
   return (
     <form
@@ -143,6 +145,12 @@ export function DepositForm() {
       </div>
 
       <div className="scrl wide:px-6 wide:pt-4 min-h-0 flex-1 overflow-y-auto px-5 pt-1.5 pb-2.5">
+        {outside ? (
+          <p className="bg-notice text-notice-ink mb-3 rounded-2xl px-3.5 py-3 text-[13px]/[1.45] font-semibold">
+            Ratrape ne couvre que {COMMUNE.name} pour le moment, et vous êtes en dehors de la
+            commune. Vous pouvez regarder la carte, mais pas publier d’annonce.
+          </p>
+        ) : null}
         <label
           className={`swatch-photo-zone border-line-disabled wide:h-[140px] relative flex h-[150px] w-full cursor-pointer flex-col items-center justify-center gap-1.5 overflow-hidden rounded-[18px] border-[1.5px] ${
             preview ? "border-solid" : "border-dashed"

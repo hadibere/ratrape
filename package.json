@@ -21,7 +21,9 @@
     "db:photo": "node --env-file-if-exists=.env.local ./node_modules/tsx/dist/cli.mjs --conditions=react-server scripts/check-deposit-photo.mts",
     "db:manage": "node --env-file-if-exists=.env.local ./node_modules/tsx/dist/cli.mjs --conditions=react-server scripts/check-manage.mts",
     "db:states": "node --env-file-if-exists=.env.local ./node_modules/tsx/dist/cli.mjs --conditions=react-server scripts/check-states.mts",
-    "check:collection": "node ./node_modules/tsx/dist/cli.mjs --conditions=react-server scripts/check-collection.mts"
+    "check:collection": "node ./node_modules/tsx/dist/cli.mjs --conditions=react-server scripts/check-collection.mts",
+    "check:commune": "node ./node_modules/tsx/dist/cli.mjs --conditions=react-server scripts/check-commune.mts",
+    "db:perimeter": "node --env-file-if-exists=.env.local ./node_modules/tsx/dist/cli.mjs --conditions=react-server scripts/check-perimeter.mts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",

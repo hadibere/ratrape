@@ -3,6 +3,7 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { COMMUNE, isInsideCommune, locationRestricted } from "@/lib/commune";
 import { createListing, setPhotoUrl } from "@/lib/data/listings";
 import {
   depositSchema,
@@ -25,6 +26,14 @@ export async function publishListing(
   const parsed = depositSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? "Formulaire incomplet" };
+  }
+
+  // Hors de la commune, Ratrape ne connaît ni le calendrier de collecte ni les
+  // règles applicables : mieux vaut refuser que publier une date fausse.
+  if (locationRestricted() && !isInsideCommune(parsed.data)) {
+    return {
+      error: `Ratrape ne couvre que ${COMMUNE.name} pour le moment. Votre position est en dehors de la commune.`,
+    };
   }
 
   const headerList = await headers();

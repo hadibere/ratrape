@@ -145,9 +145,7 @@
         "listings_manage_token_hash_unique": {
           "name": "listings_manage_token_hash_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "manage_token_hash"
-          ]
+          "columns": ["manage_token_hash"]
         }
       },
       "policies": {},

@@ -24,8 +24,8 @@ const created = await createListing({
   condition: "Correct",
   address: "1 rue du Test",
   spot: "",
-  lat: 43.6,
-  lng: 3.88,
+  lat: 48.9489,
+  lng: 2.1449,
   zone: "Parc",
   manageToken: token,
 });
@@ -55,8 +55,8 @@ const toRemove = await createListing({
   condition: "Bon état",
   address: "2 rue du Test",
   spot: "",
-  lat: 43.6,
-  lng: 3.88,
+  lat: 48.9489,
+  lng: 2.1449,
   zone: "Ville",
   manageToken: second,
 });

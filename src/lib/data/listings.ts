@@ -1,9 +1,10 @@
 import "server-only";
-import { and, count, desc, eq, gt, gte, isNull, or } from "drizzle-orm";
+import { and, between, count, desc, eq, gt, gte, isNull, or } from "drizzle-orm";
 import { getDb } from "@/db/client";
 import { listings, type ListingRow } from "@/db/schema";
 import { hashToken } from "@/lib/token";
 import { nextCollection, zoneFromDate, type Zone } from "@/lib/collection";
+import { COMMUNE, isInsideCommune } from "@/lib/commune";
 import type { Category, Condition, Listing } from "@/lib/types";
 
 /**
@@ -47,10 +48,16 @@ export async function getAvailableListings(): Promise<Listing[]> {
         eq(listings.status, "available"),
         // Une date de passage inconnue reste visible : c'est l'habitant qui l'ignore.
         or(isNull(listings.pickupAt), gt(listings.pickupAt, new Date())),
+        // Le cadre englobant se traite en base ; la forme exacte se vérifie ensuite.
+        between(listings.lat, COMMUNE.bounds.south, COMMUNE.bounds.north),
+        between(listings.lng, COMMUNE.bounds.west, COMMUNE.bounds.east),
       ),
     )
     .orderBy(desc(listings.postedAt));
-  return rows.map(publicView);
+
+  // Une annonce hors du périmètre n'a rien à faire sur la carte, quelle que soit
+  // la façon dont elle est entrée en base.
+  return rows.filter(isInsideCommune).map(publicView);
 }
 
 export async function getListing(id: string): Promise<Listing | null> {
