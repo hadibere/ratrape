@@ -8,7 +8,8 @@ import { useNeighborhood } from "@/components/shell/neighborhood-context";
 import type { TakenState } from "@/lib/deposit";
 import { formatPickup, formatPosted } from "@/lib/format";
 import { distanceMeters, formatDistance, formatWalk } from "@/lib/geo";
-import { swatchClass, type Listing } from "@/lib/types";
+import { ListingPhoto } from "@/components/listings/listing-photo";
+import type { Listing } from "@/lib/types";
 
 function InfoRow({
   label,
@@ -62,9 +63,13 @@ export function ListingDetail({ listing }: { listing: Listing }) {
   return (
     <>
       {/* Photo : aplat en attendant les photos téléversées par les habitants */}
-      <div
-        className={`wide:h-[230px] relative h-[268px] flex-none ${swatchClass(listing.category)}`}
-      >
+      <div className="wide:h-[230px] relative h-[268px] flex-none">
+        <ListingPhoto
+          listing={listing}
+          sizes="(min-width: 900px) 420px, 100vw"
+          priority
+          className="absolute inset-0 h-full w-full"
+        />
         <Link
           href="/"
           aria-label="Retour à la carte"

@@ -3,10 +3,11 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { createListing } from "@/lib/data/listings";
+import { createListing, setPhotoUrl } from "@/lib/data/listings";
 import { depositSchema, MANAGE_COOKIE, type DepositState } from "@/lib/deposit";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { generateToken } from "@/lib/token";
+import { uploadPhoto } from "@/lib/storage";
 
 /** Cinq publications par heure et par adresse IP : les voisins passent, pas les robots. */
 const LIMIT = 5;
@@ -28,7 +29,16 @@ export async function publishListing(
   }
 
   const manageToken = generateToken();
-  await createListing({ ...parsed.data, manageToken });
+  const listing = await createListing({ ...parsed.data, manageToken });
+
+  // La photo suit la création : une annonce sans image reste utile, et un envoi
+  // raté ne doit pas faire perdre à l'habitant tout ce qu'il vient de saisir.
+  const photo = formData.get("photo");
+  if (photo instanceof File && photo.size > 0) {
+    const upload = await uploadPhoto(photo, listing.id);
+    if (upload.ok) await setPhotoUrl(listing.id, upload.url);
+    else console.warn(`[photo] annonce ${listing.id} publiée sans image (${upload.reason})`);
+  }
 
   const cookieStore = await cookies();
   cookieStore.set(MANAGE_COOKIE, manageToken, {

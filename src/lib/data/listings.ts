@@ -142,3 +142,8 @@ export async function removeByToken(token: string): Promise<boolean> {
     .returning({ id: listings.id });
   return updated.length > 0;
 }
+
+/** Renseigne l'adresse de la photo une fois l'envoi au stockage réussi. */
+export async function setPhotoUrl(id: string, photoUrl: string): Promise<void> {
+  await getDb().update(listings).set({ photoUrl }).where(eq(listings.id, id));
+}

@@ -1,5 +1,6 @@
 "use client";
 
+import imageCompression from "browser-image-compression";
 import Link from "next/link";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { publishListing } from "@/app/(app)/deposer/actions";
@@ -47,7 +48,37 @@ export function DepositForm() {
   const [detecting, setDetecting] = useState(true);
   const addressTouched = useRef(false);
 
-  const [photoName, setPhotoName] = useState<string | null>(null);
+  const [photo, setPhoto] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [preparing, setPreparing] = useState(false);
+
+  /**
+   * Réduction avant envoi : une photo de téléphone pèse plusieurs mégaoctets,
+   * inenvoyable en 4G depuis le trottoir. Le réencodage supprime au passage les
+   * métadonnées EXIF, dont la position GPS de la prise de vue.
+   */
+  const pickPhoto = async (file: File | undefined) => {
+    if (!file) return;
+    setPreparing(true);
+    try {
+      const compressed = await imageCompression(file, {
+        maxSizeMB: 0.6,
+        maxWidthOrHeight: 1600,
+        useWebWorker: true,
+        fileType: "image/jpeg",
+        initialQuality: 0.8,
+      });
+      setPhoto(new File([compressed], "photo.jpg", { type: "image/jpeg" }));
+      setPreview((old) => {
+        if (old) URL.revokeObjectURL(old);
+        return URL.createObjectURL(compressed);
+      });
+    } catch {
+      setPhoto(null);
+    } finally {
+      setPreparing(false);
+    }
+  };
 
   // L'adresse suit la position tant que l'habitant ne l'a pas corrigée lui-même.
   useEffect(() => {
@@ -68,10 +99,16 @@ export function DepositForm() {
     setAddress(value);
   };
 
-  const ready = rule && address.trim().length >= 3;
+  const ready = rule && address.trim().length >= 3 && photo !== null && !preparing;
 
   return (
-    <form action={formAction} className="flex min-h-0 flex-1 flex-col">
+    <form
+      action={(formData) => {
+        if (photo) formData.set("photo", photo, photo.name);
+        return formAction(formData);
+      }}
+      className="flex min-h-0 flex-1 flex-col"
+    >
       <input type="hidden" name="category" value={category} />
       <input type="hidden" name="condition" value={condition} />
       <input type="hidden" name="pickup" value={pickup} />
@@ -96,24 +133,47 @@ export function DepositForm() {
       </div>
 
       <div className="scrl wide:px-6 wide:pt-4 min-h-0 flex-1 overflow-y-auto px-5 pt-1.5 pb-2.5">
-        <label className="swatch-photo-zone border-line-disabled wide:h-[140px] flex h-[150px] w-full cursor-pointer flex-col items-center justify-center gap-1.5 rounded-[18px] border-[1.5px] border-dashed">
-          <span className="font-display text-ink text-[15px] font-bold">
-            {photoName ?? (
-              <>
-                <span className="wide:hidden">Prendre une photo</span>
-                <span className="wide:inline hidden">Ajouter une photo</span>
-              </>
-            )}
-          </span>
-          <span className="text-muted font-mono text-[11px] font-semibold">
-            photo de l’objet sur le trottoir
-          </span>
+        <label
+          className={`swatch-photo-zone border-line-disabled wide:h-[140px] relative flex h-[150px] w-full cursor-pointer flex-col items-center justify-center gap-1.5 overflow-hidden rounded-[18px] border-[1.5px] ${
+            preview ? "border-solid" : "border-dashed"
+          }`}
+        >
+          {preview ? (
+            <>
+              {/* Aperçu local, jamais encore envoyé au serveur. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={preview}
+                alt="Aperçu de la photo choisie"
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+              <span className="bg-surface/90 text-ink font-display relative rounded-full px-3 py-1.5 text-[13px] font-bold">
+                {preparing ? "Préparation…" : "Changer la photo"}
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="font-display text-ink text-[15px] font-bold">
+                {preparing ? (
+                  "Préparation…"
+                ) : (
+                  <>
+                    <span className="wide:hidden">Prendre une photo</span>
+                    <span className="wide:inline hidden">Ajouter une photo</span>
+                  </>
+                )}
+              </span>
+              <span className="text-muted font-mono text-[11px] font-semibold">
+                photo de l’objet sur le trottoir
+              </span>
+            </>
+          )}
           <input
             type="file"
             accept="image/*"
             capture="environment"
             className="sr-only"
-            onChange={(event) => setPhotoName(event.target.files?.[0]?.name ?? null)}
+            onChange={(event) => pickPhoto(event.target.files?.[0])}
           />
         </label>
 

@@ -15,9 +15,14 @@
     "db:check": "node --env-file-if-exists=.env.local ./node_modules/tsx/dist/cli.mjs --conditions=react-server scripts/check-db.mts",
     "db:seed": "node --env-file-if-exists=.env.local ./node_modules/tsx/dist/cli.mjs --conditions=react-server scripts/seed.mts",
     "db:flow": "node --env-file-if-exists=.env.local ./node_modules/tsx/dist/cli.mjs --conditions=react-server scripts/check-flow.mts",
-    "db:taken": "node --env-file-if-exists=.env.local ./node_modules/tsx/dist/cli.mjs --conditions=react-server scripts/check-taken.mts"
+    "db:taken": "node --env-file-if-exists=.env.local ./node_modules/tsx/dist/cli.mjs --conditions=react-server scripts/check-taken.mts",
+    "storage:setup": "node --env-file-if-exists=.env.local ./node_modules/tsx/dist/cli.mjs --conditions=react-server scripts/setup-storage.mts",
+    "storage:check": "node --env-file-if-exists=.env.local ./node_modules/tsx/dist/cli.mjs --conditions=react-server scripts/check-photo.mts",
+    "db:photo": "node --env-file-if-exists=.env.local ./node_modules/tsx/dist/cli.mjs --conditions=react-server scripts/check-deposit-photo.mts"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.116.0",
+    "browser-image-compression": "^2.0.2",
     "drizzle-orm": "^0.45.2",
     "lucide-react": "^1.45.0",
     "maplibre-gl": "^6.9.0",

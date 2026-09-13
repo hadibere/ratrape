@@ -148,9 +148,19 @@ export function NeighborhoodMap({
             className="flex flex-col items-center"
           >
             <span
-              className={`border-brand text-ink flex items-center justify-center overflow-hidden rounded-full border-[3px] text-center font-mono text-[10px]/[1.1] font-bold ${pinSize} ${swatchClass(listing.category)}`}
+              className={`border-brand text-ink relative flex items-center justify-center overflow-hidden rounded-full border-[3px] text-center font-mono text-[10px]/[1.1] font-bold ${pinSize} ${listing.photoUrl ? "" : swatchClass(listing.category)}`}
             >
-              {pinTag(listing.name)}
+              {listing.photoUrl ? (
+                // Rendu dans un marqueur MapLibre : une balise simple suffit.
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={listing.photoUrl}
+                  alt=""
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+              ) : (
+                pinTag(listing.name)
+              )}
             </span>
             <span className="bg-brand -mt-1.5 h-2.5 w-2.5 rotate-45 rounded-[2px]" />
           </Link>,

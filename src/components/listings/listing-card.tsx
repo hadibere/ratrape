@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { formatDistance } from "@/lib/geo";
-import { swatchClass, type Listing } from "@/lib/types";
+import { ListingPhoto } from "@/components/listings/listing-photo";
+import type { Listing } from "@/lib/types";
 
 type CardProps = {
   listing: Listing;
@@ -16,7 +17,7 @@ export function ListingCard({ listing, distanceMeters }: CardProps) {
       href={href(listing)}
       className="border-line bg-card shadow-card w-[158px] flex-none overflow-hidden rounded-2xl border"
     >
-      <span className={`border-line block h-[78px] border-b ${swatchClass(listing.category)}`} />
+      <ListingPhoto listing={listing} sizes="158px" className="border-line h-[78px] border-b" />
       <span className="block px-[11px] pt-[9px] pb-[11px]">
         <span className="font-display text-ink block text-sm/[1.2] font-bold">{listing.name}</span>
         <span className="text-muted mt-[3px] block text-xs">
@@ -34,7 +35,11 @@ export function ListingRow({ listing, distanceMeters }: CardProps) {
       href={href(listing)}
       className="border-line bg-card flex items-center gap-3 rounded-2xl border p-2.5"
     >
-      <span className={`h-[66px] w-[76px] flex-none rounded-xl ${swatchClass(listing.category)}`} />
+      <ListingPhoto
+        listing={listing}
+        sizes="76px"
+        className="h-[66px] w-[76px] flex-none rounded-xl"
+      />
       <span className="block min-w-0">
         <span className="font-display text-ink block text-[15px]/[1.2] font-bold">
           {listing.name}
