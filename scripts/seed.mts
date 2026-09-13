@@ -1,8 +1,14 @@
 /**
- * Remplit la base avec quelques encombrants de démonstration autour du centre
- * du quartier. Lancer avec `pnpm db:seed`. Efface d'abord les annonces
- * existantes : à ne pas lancer sur une base qui sert vraiment.
+ * Remplit la base avec quelques encombrants de démonstration.
+ *
+ *   pnpm db:seed                  autour de la dernière annonce déposée,
+ *                                 ou du centre par défaut si la base est vide
+ *   pnpm db:seed 48.8566 2.3522   autour du point donné
+ *
+ * Efface d'abord les annonces existantes : à ne pas lancer sur une base qui
+ * sert vraiment.
  */
+import { desc } from "drizzle-orm";
 import { getDb } from "@/db/client";
 import { listings } from "@/db/schema";
 import { nextWeekdayAt6 } from "@/lib/format";
@@ -79,6 +85,28 @@ const SEEDS: Seed[] = [
 
 const db = getDb();
 
+/**
+ * Centre des annonces d'exemple. Par défaut celui de la dernière annonce
+ * déposée : en développement, c'est là où se trouve la personne qui teste, donc
+ * les exemples tombent dans son quartier plutôt qu'à l'autre bout du pays.
+ */
+async function resolveCenter(): Promise<{ lat: number; lng: number; source: string }> {
+  const [lat, lng] = process.argv.slice(2).map(Number);
+  if (Number.isFinite(lat) && Number.isFinite(lng)) {
+    return { lat, lng, source: "coordonnées passées en argument" };
+  }
+  const [last] = await db
+    .select({ lat: listings.lat, lng: listings.lng })
+    .from(listings)
+    .orderBy(desc(listings.postedAt))
+    .limit(1);
+  if (last) return { ...last, source: "dernière annonce déposée" };
+  return { ...DEFAULT_CENTER, source: "centre par défaut" };
+}
+
+const center = await resolveCenter();
+console.log(`Centre : ${center.source}`);
+
 const removed = await db.delete(listings).returning({ id: listings.id });
 console.log(`${removed.length} annonce(s) effacée(s)`);
 
@@ -92,8 +120,8 @@ for (const seed of SEEDS) {
     condition: seed.condition,
     address: seed.address,
     spot: seed.spot,
-    lat: DEFAULT_CENTER.lat + seed.dLat,
-    lng: DEFAULT_CENTER.lng + seed.dLng,
+    lat: center.lat + seed.dLat,
+    lng: center.lng + seed.dLng,
     postedAt: new Date(Date.now() - seed.postedMinutesAgo * 60_000),
     pickupAt: nextWeekdayAt6(seed.pickupWeekday),
     status: "available",
