@@ -6,15 +6,10 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import { publishListing } from "@/app/(app)/deposer/actions";
 import type { DepositState } from "@/lib/deposit";
 import { ChoiceButtons } from "@/components/deposit/choice-buttons";
+import { ZoneChoice } from "@/components/deposit/zone-choice";
 import { useNeighborhood } from "@/components/shell/neighborhood-context";
-import {
-  CATEGORIES,
-  CONDITIONS,
-  PICKUP_CHOICES,
-  type Category,
-  type Condition,
-  type PickupChoice,
-} from "@/lib/types";
+import { FINE_EUROS, LIMITS, WEEE_NOTICE, type Zone } from "@/lib/collection";
+import { CATEGORIES, CONDITIONS, type Category, type Condition } from "@/lib/types";
 
 const SectionTitle = ({ children }: { children: string }) => (
   <h2 className="font-display text-ink mt-[18px] mb-2 text-[13px] font-bold">{children}</h2>
@@ -40,7 +35,22 @@ export function DepositForm() {
 
   const [category, setCategory] = useState<Category>("Meubles");
   const [condition, setCondition] = useState<Condition>("Correct");
-  const [pickup, setPickup] = useState<PickupChoice>("Jeudi");
+  const [zone, setZone] = useState<Zone>("Ville");
+
+  // La zone ne change pas d'un dépôt à l'autre : on évite de la redemander.
+  // Appliquée après le premier rendu, sinon le serveur et le navigateur
+  // n'afficheraient pas la même date de collecte.
+  useEffect(() => {
+    const saved = window.localStorage.getItem("ratrape.zone");
+    if (saved !== "Ville" && saved !== "Parc") return;
+    const timer = setTimeout(() => setZone(saved), 0);
+    return () => clearTimeout(timer);
+  }, []);
+
+  const pickZone = (next: Zone) => {
+    setZone(next);
+    window.localStorage.setItem("ratrape.zone", next);
+  };
   const [rule, setRule] = useState(false);
 
   const [address, setAddress] = useState("");
@@ -111,7 +121,7 @@ export function DepositForm() {
     >
       <input type="hidden" name="category" value={category} />
       <input type="hidden" name="condition" value={condition} />
-      <input type="hidden" name="pickup" value={pickup} />
+      <input type="hidden" name="zone" value={zone} />
       <input type="hidden" name="lat" value={center.lat} />
       <input type="hidden" name="lng" value={center.lng} />
       <input type="hidden" name="rule" value={rule ? "on" : ""} />
@@ -185,6 +195,8 @@ export function DepositForm() {
           layout="pills"
         />
 
+        <p className="text-muted mt-2 text-xs/[1.45]">{WEEE_NOTICE}</p>
+
         <SectionTitle>État</SectionTitle>
         <ChoiceButtons
           options={CONDITIONS}
@@ -233,13 +245,8 @@ export function DepositForm() {
           />
         </div>
 
-        <SectionTitle>Passage du camion</SectionTitle>
-        <ChoiceButtons
-          options={PICKUP_CHOICES}
-          value={pickup}
-          onChange={setPickup}
-          layout="blocks"
-        />
+        <SectionTitle>Zone de collecte</SectionTitle>
+        <ZoneChoice value={zone} onChange={pickZone} />
 
         <button
           type="button"
@@ -257,7 +264,8 @@ export function DepositForm() {
             {rule ? "✓" : ""}
           </span>
           <span className="text-ink text-[13px]/[1.45] font-semibold">
-            Je dépose dans le cadre prévu par ma ville (jour et lieu de collecte autorisés).{" "}
+            Je sors l’objet la veille au soir de la collecte de ma zone, devant chez moi. {LIMITS}{" "}
+            Un dépôt hors de ces règles est puni de {FINE_EUROS} € d’amende.{" "}
             <span className="text-danger">Obligatoire</span>
           </span>
         </button>

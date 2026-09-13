@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import { EmptyState } from "@/components/listings/empty-state";
+import { CollectionBanner } from "@/components/map-screen/collection-banner";
 import { GeoBanner } from "@/components/map-screen/geo-banner";
 import { FilterChips } from "@/components/listings/filter-chips";
 import { ListingCard, ListingRow } from "@/components/listings/listing-card";
@@ -24,13 +25,14 @@ export function MapPanel() {
           Ratrape
         </h1>
         <p className="text-muted mt-0.5 text-[13px]/[1.4]">
-          Quartier Saint-Roch · encombrants à récupérer
+          Maisons-Laffitte · encombrants à récupérer
         </p>
         <SavedCounter
           count={savedThisMonth}
           className="wide:hidden bg-brand-soft mt-3 px-3.5 py-2 text-[13px]"
         />
         <FilterChips value={filter} onChange={setFilter} className="wide:mt-3.5 mt-3 pb-0.5" />
+        <CollectionBanner className="mt-3" />
         <GeoBanner className="mt-3" />
       </div>
 

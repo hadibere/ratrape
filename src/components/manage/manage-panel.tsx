@@ -4,16 +4,12 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { editListing, removeListing, takeListing } from "@/app/(app)/g/[token]/actions";
 import { ChoiceButtons } from "@/components/deposit/choice-buttons";
+import { ZoneChoice } from "@/components/deposit/zone-choice";
 import { ListingPhoto } from "@/components/listings/listing-photo";
-import { formatPickup, formatPosted, pickupChoiceFromIso } from "@/lib/format";
+import { formatCollectionDay, nextCollection, type Zone } from "@/lib/collection";
+import { formatPosted } from "@/lib/format";
 import type { ManageState } from "@/lib/manage";
-import {
-  CONDITIONS,
-  PICKUP_CHOICES,
-  type Condition,
-  type Listing,
-  type PickupChoice,
-} from "@/lib/types";
+import { CONDITIONS, type Condition, type Listing } from "@/lib/types";
 
 const SectionTitle = ({ children }: { children: string }) => (
   <h2 className="font-display text-ink mt-[18px] mb-2 text-[13px] font-bold">{children}</h2>
@@ -25,7 +21,7 @@ export function ManagePanel({ listing, token }: { listing: Listing; token: strin
   const [confirming, setConfirming] = useState(false);
 
   const [condition, setCondition] = useState<Condition>(listing.condition);
-  const [pickup, setPickup] = useState<PickupChoice>(pickupChoiceFromIso(listing.pickupAt || null));
+  const [zone, setZone] = useState<Zone>(listing.zone ?? "Ville");
   const [spot, setSpot] = useState(listing.spot ?? "");
 
   const run = (action: () => Promise<ManageState>) => {
@@ -92,6 +88,12 @@ export function ManagePanel({ listing, token }: { listing: Listing; token: strin
             <span className="text-muted mt-[3px] block text-xs">
               Déposé {formatPosted(listing.postedAt).toLowerCase()}
             </span>
+            <span className="text-brand mt-[3px] block text-xs font-semibold">
+              Collecte{" "}
+              {formatCollectionDay(
+                new Date(listing.pickupAt || nextCollection(zone)),
+              ).toLowerCase()}
+            </span>
           </span>
         </div>
 
@@ -103,16 +105,8 @@ export function ManagePanel({ listing, token }: { listing: Listing; token: strin
           layout="blocks"
         />
 
-        <SectionTitle>Passage du camion</SectionTitle>
-        <ChoiceButtons
-          options={PICKUP_CHOICES}
-          value={pickup}
-          onChange={setPickup}
-          layout="blocks"
-        />
-        <p className="text-muted mt-2 text-xs">
-          Actuellement : {formatPickup(listing.pickupAt || null).toLowerCase()}
-        </p>
+        <SectionTitle>Zone de collecte</SectionTitle>
+        <ZoneChoice value={zone} onChange={setZone} />
 
         <SectionTitle>Précision d’emplacement</SectionTitle>
         <input
@@ -124,7 +118,7 @@ export function ManagePanel({ listing, token }: { listing: Listing; token: strin
 
         <button
           type="button"
-          onClick={() => run(() => editListing(token, { condition, pickup, spot }))}
+          onClick={() => run(() => editListing(token, { condition, zone, spot }))}
           disabled={pending}
           className="bg-brand font-display hover:bg-brand-hover mt-4 h-[52px] w-full cursor-pointer rounded-2xl text-base font-bold text-white disabled:cursor-default disabled:opacity-70"
         >

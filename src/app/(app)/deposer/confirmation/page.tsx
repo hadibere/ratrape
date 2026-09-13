@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { MANAGE_COOKIE, PHOTO_FAILED_COOKIE } from "@/lib/deposit";
 import { DepositDone } from "@/components/deposit/deposit-done";
 import { getListingByToken } from "@/lib/data/listings";
-import { weekdayLabel } from "@/lib/format";
+import { formatCollectionDay, formatEve } from "@/lib/collection";
 import { CATEGORY_PHRASE } from "@/lib/types";
 
 export default async function ConfirmationPage() {
@@ -17,8 +17,9 @@ export default async function ConfirmationPage() {
 
   const { article, label } = CATEGORY_PHRASE[listing.category];
   const pronoun = article === "la" ? "la" : "le";
-  const sentence = listing.pickupAt
-    ? `Votre ${label} est visible par le quartier. Le camion passe ${weekdayLabel(listing.pickupAt)} matin : d’ici là, un voisin peut ${pronoun} prendre.`
+  const collection = listing.pickupAt ? new Date(listing.pickupAt) : null;
+  const sentence = collection
+    ? `Votre ${label} est visible par le quartier. La collecte a lieu ${formatCollectionDay(collection).toLowerCase()} au matin : sortez-le ${formatEve(collection)}, un voisin peut ${pronoun} prendre d’ici là.`
     : `Votre ${label} est visible par le quartier. Dès qu’un voisin passe, il peut ${pronoun} prendre.`;
 
   const site = process.env.NEXT_PUBLIC_SITE_URL ?? "ratrape.fr";

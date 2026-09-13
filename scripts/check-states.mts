@@ -15,8 +15,14 @@ const ok = (label: string, condition: boolean) => console.log(condition ? "OK  "
 
 const make = async (address: string) =>
   createListing({
-    category: "Meubles", condition: "Correct", address, spot: "",
-    lat: 48.94, lng: 2.15, pickup: "Jeudi", manageToken: generateToken(),
+    category: "Meubles",
+    condition: "Correct",
+    address,
+    spot: "",
+    lat: 48.94,
+    lng: 2.15,
+    zone: "Ville",
+    manageToken: generateToken(),
   });
 
 // Camion passé : l'annonce est présentée comme ramassée, sans que personne ne l'ait signalé.
@@ -27,30 +33,56 @@ await getDb()
   .where(eq(listings.id, past.id));
 const expired = await getListing(past.id);
 ok("camion passé : statut « collected »", expired?.status === "collected");
-ok("camion passé : absente de la carte", !(await getAvailableListings()).some((l) => l.id === past.id));
+ok(
+  "camion passé : absente de la carte",
+  !(await getAvailableListings()).some((l) => l.id === past.id),
+);
 
 // Date de passage inconnue : l'annonce reste visible tant que personne ne la retire.
 const unknown = await createListing({
-  category: "Déco", condition: "Bon état", address: "2 rue Sans Date", spot: "",
-  lat: 48.94, lng: 2.15, pickup: "Je ne sais pas", manageToken: generateToken(),
+  category: "Déco",
+  condition: "Bon état",
+  address: "2 rue Sans Date",
+  spot: "",
+  lat: 48.94,
+  lng: 2.15,
+  zone: "Parc",
+  manageToken: generateToken(),
 });
-ok("sans date de collecte : statut inchangé", (await getListing(unknown.id))?.status === "available");
-ok("sans date de collecte : visible sur la carte",
-  (await getAvailableListings()).some((l) => l.id === unknown.id));
+ok(
+  "sans date de collecte : statut inchangé",
+  (await getListing(unknown.id))?.status === "available",
+);
+ok(
+  "sans date de collecte : visible sur la carte",
+  (await getAvailableListings()).some((l) => l.id === unknown.id),
+);
 
 // Objet récupéré puis annonce retirée : deux situations distinctes.
 const takenToken = generateToken();
 const taken = await createListing({
-  category: "Vélos", condition: "Bon état", address: "3 rue Prise", spot: "",
-  lat: 48.94, lng: 2.15, pickup: "Jeudi", manageToken: takenToken,
+  category: "Vélos",
+  condition: "Bon état",
+  address: "3 rue Prise",
+  spot: "",
+  lat: 48.94,
+  lng: 2.15,
+  zone: "Ville",
+  manageToken: takenToken,
 });
 await markTakenByToken(takenToken);
 ok("objet pris : statut « taken »", (await getListing(taken.id))?.status === "taken");
 
 const removedToken = generateToken();
 const removed = await createListing({
-  category: "Literie", condition: "Correct", address: "4 rue Retirée", spot: "",
-  lat: 48.94, lng: 2.15, pickup: "Jeudi", manageToken: removedToken,
+  category: "Literie",
+  condition: "Correct",
+  address: "4 rue Retirée",
+  spot: "",
+  lat: 48.94,
+  lng: 2.15,
+  zone: "Ville",
+  manageToken: removedToken,
 });
 await removeByToken(removedToken);
 ok("annonce retirée : statut « removed »", (await getListing(removed.id))?.status === "removed");

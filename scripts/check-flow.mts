@@ -26,11 +26,11 @@ const created = await createListing({
   spot: "",
   lat: 43.6,
   lng: 3.88,
-  pickup: "Je ne sais pas",
+  zone: "Parc",
   manageToken: token,
 });
 ok("annonce créée", Boolean(created.id));
-ok("date de passage vide quand l'habitant ne sait pas", created.pickupAt === "");
+ok("date de collecte calculée depuis la zone", created.pickupAt !== "" && created.zone === "Parc");
 
 const after = await getAvailableListings();
 ok(
@@ -57,7 +57,7 @@ const toRemove = await createListing({
   spot: "",
   lat: 43.6,
   lng: 3.88,
-  pickup: "Jeudi",
+  zone: "Ville",
   manageToken: second,
 });
 ok("retrait par le lien de gestion", (await removeByToken(second)) === toRemove.id);

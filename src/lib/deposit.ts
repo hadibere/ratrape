@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { CATEGORIES, CONDITIONS, PICKUP_CHOICES } from "@/lib/types";
+import { ZONES } from "@/lib/collection";
+import { CATEGORIES, CONDITIONS } from "@/lib/types";
 
 /** Champs du formulaire de dépôt, validés côté serveur. */
 export const depositSchema = z.object({
@@ -9,7 +10,7 @@ export const depositSchema = z.object({
   spot: z.string().trim().max(120).default(""),
   lat: z.coerce.number().min(-90).max(90),
   lng: z.coerce.number().min(-180).max(180),
-  pickup: z.enum(PICKUP_CHOICES),
+  zone: z.enum(ZONES),
   rule: z.literal("on", { message: "La case de dépôt autorisé est obligatoire" }),
 });
 

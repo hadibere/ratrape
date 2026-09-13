@@ -13,7 +13,7 @@
 import { desc, eq } from "drizzle-orm";
 import { getDb } from "@/db/client";
 import { listings } from "@/db/schema";
-import { nextWeekdayAt6 } from "@/lib/format";
+import { nextCollection, type Zone } from "@/lib/collection";
 import { DEFAULT_CENTER } from "@/lib/geo";
 import { generateToken, hashToken } from "@/lib/token";
 import type { Category, Condition } from "@/lib/types";
@@ -30,8 +30,8 @@ type Seed = {
   dLng: number;
   /** Ancienneté du dépôt, en minutes. */
   postedMinutesAgo: number;
-  /** Jour de passage du camion (4 = jeudi, 5 = vendredi). */
-  pickupWeekday: number;
+  /** Zone de collecte de la commune. */
+  zone: Zone;
 };
 
 const SEEDS: Seed[] = [
@@ -45,7 +45,7 @@ const SEEDS: Seed[] = [
     dLat: 0.0008,
     dLng: 0.001,
     postedMinutesAgo: 35,
-    pickupWeekday: 4,
+    zone: "Ville",
   },
   {
     id: "commode-en-pin",
@@ -57,7 +57,7 @@ const SEEDS: Seed[] = [
     dLat: -0.0018,
     dLng: 0.00278,
     postedMinutesAgo: 70,
-    pickupWeekday: 4,
+    zone: "Ville",
   },
   {
     id: "velo-enfant-16",
@@ -69,19 +69,19 @@ const SEEDS: Seed[] = [
     dLat: 0.003,
     dLng: -0.0037,
     postedMinutesAgo: 900,
-    pickupWeekday: 4,
+    zone: "Ville",
   },
   {
-    id: "lave-linge-hublot",
-    name: "Lave-linge hublot",
-    category: "Électro",
-    condition: "À réparer",
+    id: "table-basse-verre",
+    name: "Table basse en verre",
+    category: "Déco",
+    condition: "Correct",
     address: "8 rue Mozart",
-    spot: "Angle du trottoir, ne fuit pas",
+    spot: "Angle du trottoir, plateau fêlé",
     dLat: -0.0045,
     dLng: -0.0041,
     postedMinutesAgo: 115,
-    pickupWeekday: 5,
+    zone: "Parc",
   },
 ];
 
@@ -150,7 +150,8 @@ for (const seed of SEEDS) {
     lat: center.lat + seed.dLat,
     lng: center.lng + seed.dLng,
     postedAt: new Date(Date.now() - seed.postedMinutesAgo * 60_000),
-    pickupAt: nextWeekdayAt6(seed.pickupWeekday),
+    pickupAt: nextCollection(seed.zone),
+    zone: seed.zone,
     status: "available",
     manageTokenHash: hashToken(token),
   });

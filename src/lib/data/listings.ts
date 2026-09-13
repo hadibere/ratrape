@@ -2,9 +2,9 @@ import "server-only";
 import { and, count, desc, eq, gt, gte, isNull, or } from "drizzle-orm";
 import { getDb } from "@/db/client";
 import { listings, type ListingRow } from "@/db/schema";
-import { nextWeekdayAt6 } from "@/lib/format";
 import { hashToken } from "@/lib/token";
-import type { Category, Condition, Listing, PickupChoice } from "@/lib/types";
+import { nextCollection, zoneFromDate, type Zone } from "@/lib/collection";
+import type { Category, Condition, Listing } from "@/lib/types";
 
 /**
  * Compteur du mois avant les objets récupérés via l'application.
@@ -32,6 +32,7 @@ function publicView(row: ListingRow): Listing {
     lng: row.lng,
     postedAt: row.postedAt.toISOString(),
     pickupAt: row.pickupAt ? row.pickupAt.toISOString() : "",
+    zone: (row.zone as Zone | null) ?? zoneFromDate(row.pickupAt?.toISOString() ?? null),
     status: collected ? "collected" : (row.status as Listing["status"]),
   };
 }
@@ -86,7 +87,7 @@ export type NewListing = {
   spot: string;
   lat: number;
   lng: number;
-  pickup: PickupChoice;
+  zone: Zone;
   manageToken: string;
 };
 
@@ -98,13 +99,6 @@ function slugify(value: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "")
     .slice(0, 24);
-}
-
-/** Jeudi et vendredi sont les seuls choix du formulaire ; « Je ne sais pas » laisse la date vide. */
-function pickupDate(choice: PickupChoice): Date | null {
-  if (choice === "Jeudi") return nextWeekdayAt6(4);
-  if (choice === "Vendredi") return nextWeekdayAt6(5);
-  return null;
 }
 
 export async function createListing(input: NewListing): Promise<Listing> {
@@ -121,7 +115,8 @@ export async function createListing(input: NewListing): Promise<Listing> {
       spot: input.spot || null,
       lat: input.lat,
       lng: input.lng,
-      pickupAt: pickupDate(input.pickup),
+      pickupAt: nextCollection(input.zone),
+      zone: input.zone,
       status: "available",
       manageTokenHash: hashToken(input.manageToken),
     })
@@ -164,7 +159,7 @@ export async function markTakenByToken(token: string): Promise<string | null> {
 
 export type ListingEdit = {
   condition: Condition;
-  pickup: PickupChoice;
+  zone: Zone;
   spot: string;
 };
 
@@ -174,7 +169,8 @@ export async function updateByToken(token: string, edit: ListingEdit): Promise<s
     .update(listings)
     .set({
       condition: edit.condition,
-      pickupAt: pickupDate(edit.pickup),
+      pickupAt: nextCollection(edit.zone),
+      zone: edit.zone,
       spot: edit.spot || null,
     })
     .where(and(eq(listings.manageTokenHash, hashToken(token)), eq(listings.status, "available")))

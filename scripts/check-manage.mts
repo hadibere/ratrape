@@ -9,7 +9,6 @@ import {
   removeByToken,
   updateByToken,
 } from "@/lib/data/listings";
-import { pickupChoiceFromIso } from "@/lib/format";
 import { deletePhotos, uploadPhoto } from "@/lib/storage";
 import { generateToken } from "@/lib/token";
 
@@ -28,7 +27,7 @@ const listing = await createListing({
   spot: "Sous le porche",
   lat: 43.6,
   lng: 3.88,
-  pickup: "Jeudi",
+  zone: "Ville",
   manageToken: token,
 });
 
@@ -38,19 +37,19 @@ ok(
   "jeton insensible à la casse",
   (await getListingByToken(token.toLowerCase()))?.id === listing.id,
 );
-ok("jour de collecte relu correctement", pickupChoiceFromIso(listing.pickupAt) === "Jeudi");
+ok("zone enregistrée au dépôt", listing.zone === "Ville");
 
 ok(
   "modification acceptée",
   (await updateByToken(token, {
     condition: "À réparer",
-    pickup: "Vendredi",
+    zone: "Parc",
     spot: "Contre le muret",
   })) === listing.id,
 );
 const edited = await getListing(listing.id);
 ok("état modifié", edited?.condition === "À réparer");
-ok("jour de collecte modifié", pickupChoiceFromIso(edited?.pickupAt ?? null) === "Vendredi");
+ok("zone modifiée", edited?.zone === "Parc");
 ok("précision modifiée", edited?.spot === "Contre le muret");
 
 // Retrait : l'annonce et sa photo doivent disparaître ensemble.
@@ -69,7 +68,7 @@ ok("disparue de la carte", !(await getAvailableListings()).some((l) => l.id === 
 ok("compteur des objets sauvés inchangé", (await getSavedThisMonth()) === savedBefore);
 ok(
   "modification refusée après retrait",
-  (await updateByToken(token, { condition: "Correct", pickup: "Jeudi", spot: "" })) === null,
+  (await updateByToken(token, { condition: "Correct", zone: "Ville", spot: "" })) === null,
 );
 ok("« quelqu'un l'a pris » refusé après retrait", (await markTakenByToken(token)) === null);
 
@@ -82,7 +81,7 @@ const taken = await createListing({
   spot: "",
   lat: 43.6,
   lng: 3.88,
-  pickup: "Jeudi",
+  zone: "Ville",
   manageToken: second,
 });
 ok("« quelqu'un l'a pris » accepté", (await markTakenByToken(second)) === taken.id);

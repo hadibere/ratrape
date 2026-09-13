@@ -17,7 +17,7 @@ const listing = await createListing({
   spot: "",
   lat: 43.6,
   lng: 3.88,
-  pickup: "Jeudi",
+  zone: "Ville",
   manageToken: generateToken(),
 });
 

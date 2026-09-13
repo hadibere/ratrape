@@ -18,8 +18,10 @@ export const listings = pgTable(
     lat: doublePrecision("lat").notNull(),
     lng: doublePrecision("lng").notNull(),
     postedAt: timestamp("posted_at", { withTimezone: true }).notNull().defaultNow(),
-    /** Passage du camion ; nul quand l'habitant a répondu « je ne sais pas ». */
+    /** Passage du camion, calculé depuis la zone au moment du dépôt. */
     pickupAt: timestamp("pickup_at", { withTimezone: true }),
+    /** Zone de collecte de la commune ; nulle pour les annonces d'avant ce champ. */
+    zone: text("zone"),
     status: text("status").notNull().default("available"),
     /** Empreinte SHA-256 du jeton de gestion : le jeton lui-même n'est jamais stocké. */
     manageTokenHash: text("manage_token_hash").notNull().unique(),
