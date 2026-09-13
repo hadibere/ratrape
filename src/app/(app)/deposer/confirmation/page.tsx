@@ -22,5 +22,5 @@ export default async function ConfirmationPage() {
   const site = process.env.NEXT_PUBLIC_SITE_URL ?? "ratrape.fr";
   const manageUrl = `${site.replace(/^https?:\/\//, "")}/g/${token}`;
 
-  return <DepositDone sentence={sentence} manageUrl={manageUrl} />;
+  return <DepositDone sentence={sentence} manageUrl={manageUrl} managePath={`/g/${token}`} />;
 }

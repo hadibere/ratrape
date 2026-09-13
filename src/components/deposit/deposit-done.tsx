@@ -6,10 +6,13 @@ import { useState } from "react";
 type DepositDoneProps = {
   /** Phrase construite à partir du type d'objet et de la date de collecte. */
   sentence: string;
+  /** Adresse lisible, affichée et copiée : « ratrape.fr/g/8K2-PLM ». */
   manageUrl: string;
+  /** Chemin interne correspondant, pour ouvrir la page sans quitter le site. */
+  managePath: `/g/${string}`;
 };
 
-export function DepositDone({ sentence, manageUrl }: DepositDoneProps) {
+export function DepositDone({ sentence, manageUrl, managePath }: DepositDoneProps) {
   const [copied, setCopied] = useState(false);
 
   const copy = async () => {
@@ -36,9 +39,12 @@ export function DepositDone({ sentence, manageUrl }: DepositDoneProps) {
         <div className="text-label text-[11px] font-semibold tracking-[0.06em] uppercase">
           Votre lien de gestion
         </div>
-        <div className="text-brand mt-1.5 font-mono text-[13px] font-semibold break-all">
+        <Link
+          href={managePath}
+          className="text-brand mt-1.5 block font-mono text-[13px] font-semibold break-all underline-offset-2 hover:underline"
+        >
           {manageUrl}
-        </div>
+        </Link>
         <p className="text-muted mt-2 text-xs/[1.45]">
           Gardez ce lien pour modifier ou retirer l’annonce. Aucun compte, aucun mot de passe.
         </p>

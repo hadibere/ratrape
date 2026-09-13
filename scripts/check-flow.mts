@@ -60,7 +60,7 @@ const toRemove = await createListing({
   pickup: "Jeudi",
   manageToken: second,
 });
-ok("retrait par le lien de gestion", await removeByToken(second));
+ok("retrait par le lien de gestion", (await removeByToken(second)) === toRemove.id);
 ok(
   "disparue de la carte sans compter comme sauvée",
   !(await getAvailableListings()).some((l) => l.id === toRemove.id) &&

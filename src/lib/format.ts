@@ -104,3 +104,14 @@ export function weekdayLabel(iso: string | null): string {
   if (!iso) return "bientôt";
   return new Intl.DateTimeFormat("fr-FR", { timeZone: TZ, weekday: "long" }).format(new Date(iso));
 }
+
+/** Retrouve le choix du formulaire à partir de la date enregistrée. */
+export function pickupChoiceFromIso(iso: string | null): "Jeudi" | "Vendredi" | "Je ne sais pas" {
+  if (!iso) return "Je ne sais pas";
+  const weekday = new Intl.DateTimeFormat("fr-FR", { timeZone: TZ, weekday: "short" }).format(
+    new Date(iso),
+  );
+  if (WEEKDAYS[weekday] === 4) return "Jeudi";
+  if (WEEKDAYS[weekday] === 5) return "Vendredi";
+  return "Je ne sais pas";
+}

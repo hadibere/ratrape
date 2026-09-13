@@ -133,14 +133,47 @@ export async function markTaken(id: string): Promise<boolean> {
   return updated.length > 0;
 }
 
-/** Retrait par le lien de gestion : l'annonce disparaît sans compter comme sauvée. */
-export async function removeByToken(token: string): Promise<boolean> {
-  const updated = await getDb()
+/**
+ * Retrait par le lien de gestion : l'annonce disparaît sans compter comme
+ * sauvée. Renvoie son identifiant pour que l'appelant efface aussi les photos.
+ */
+export async function removeByToken(token: string): Promise<string | null> {
+  const [removed] = await getDb()
     .update(listings)
-    .set({ status: "removed" })
+    .set({ status: "removed", photoUrl: null })
+    .where(eq(listings.manageTokenHash, hashToken(token)))
+    .returning({ id: listings.id });
+  return removed?.id ?? null;
+}
+
+/** Le déposant signale lui-même que l'objet est parti. */
+export async function markTakenByToken(token: string): Promise<string | null> {
+  const [taken] = await getDb()
+    .update(listings)
+    .set({ status: "taken", takenAt: new Date() })
     .where(and(eq(listings.manageTokenHash, hashToken(token)), eq(listings.status, "available")))
     .returning({ id: listings.id });
-  return updated.length > 0;
+  return taken?.id ?? null;
+}
+
+export type ListingEdit = {
+  condition: Condition;
+  pickup: PickupChoice;
+  spot: string;
+};
+
+/** Seuls ces trois champs changent après coup ; le reste demande un nouveau dépôt. */
+export async function updateByToken(token: string, edit: ListingEdit): Promise<string | null> {
+  const [updated] = await getDb()
+    .update(listings)
+    .set({
+      condition: edit.condition,
+      pickupAt: pickupDate(edit.pickup),
+      spot: edit.spot || null,
+    })
+    .where(and(eq(listings.manageTokenHash, hashToken(token)), eq(listings.status, "available")))
+    .returning({ id: listings.id });
+  return updated?.id ?? null;
 }
 
 /** Renseigne l'adresse de la photo une fois l'envoi au stockage réussi. */

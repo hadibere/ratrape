@@ -3,12 +3,14 @@
  *
  *   pnpm db:seed                  autour de la dernière annonce déposée,
  *                                 ou du centre par défaut si la base est vide
- *   pnpm db:seed 48.8566 2.3522   autour du point donné
+ *   pnpm db:seed 48.8566 2.3522   autour de ces coordonnées
+ *   pnpm db:seed Saint-Denis     autour de ce lieu, cherché dans la Base
+ *                                 Adresse Nationale
  *
  * Efface d'abord les annonces existantes : à ne pas lancer sur une base qui
  * sert vraiment.
  */
-import { desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { getDb } from "@/db/client";
 import { listings } from "@/db/schema";
 import { nextWeekdayAt6 } from "@/lib/format";
@@ -85,22 +87,47 @@ const SEEDS: Seed[] = [
 
 const db = getDb();
 
+/** Cherche un lieu français par son nom, via la Base Adresse Nationale. */
+async function geocode(query: string): Promise<{ lat: number; lng: number; label: string } | null> {
+  const url = `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&limit=1`;
+  const response = await fetch(url);
+  if (!response.ok) return null;
+  const data = (await response.json()) as {
+    features?: { geometry: { coordinates: [number, number] }; properties: { label: string } }[];
+  };
+  const found = data.features?.[0];
+  if (!found) return null;
+  const [lng, lat] = found.geometry.coordinates;
+  return { lat, lng, label: found.properties.label };
+}
+
 /**
- * Centre des annonces d'exemple. Par défaut celui de la dernière annonce
- * déposée : en développement, c'est là où se trouve la personne qui teste, donc
- * les exemples tombent dans son quartier plutôt qu'à l'autre bout du pays.
+ * Centre des annonces d'exemple, par ordre de priorité : les arguments de la
+ * commande, puis la dernière annonce encore en ligne, puis le quartier par
+ * défaut. Les annonces retirées ou récupérées sont ignorées, sinon les restes
+ * d'un script de test décideraient de l'endroit.
  */
 async function resolveCenter(): Promise<{ lat: number; lng: number; source: string }> {
-  const [lat, lng] = process.argv.slice(2).map(Number);
-  if (Number.isFinite(lat) && Number.isFinite(lng)) {
+  const args = process.argv.slice(2);
+  const [lat, lng] = args.map(Number);
+  if (args.length >= 2 && Number.isFinite(lat) && Number.isFinite(lng)) {
     return { lat, lng, source: "coordonnées passées en argument" };
   }
+
+  if (args.length > 0) {
+    const place = await geocode(args.join(" "));
+    if (place) return { lat: place.lat, lng: place.lng, source: `lieu « ${place.label} »` };
+    console.error(`Lieu « ${args.join(" ")} » introuvable.`);
+    process.exit(1);
+  }
+
   const [last] = await db
     .select({ lat: listings.lat, lng: listings.lng })
     .from(listings)
+    .where(eq(listings.status, "available"))
     .orderBy(desc(listings.postedAt))
     .limit(1);
-  if (last) return { ...last, source: "dernière annonce déposée" };
+  if (last) return { ...last, source: "dernière annonce en ligne" };
   return { ...DEFAULT_CENTER, source: "centre par défaut" };
 }
 
