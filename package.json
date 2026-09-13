@@ -8,7 +8,13 @@
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write .",
-    "typecheck": "next typegen && tsc --noEmit"
+    "typecheck": "next typegen && tsc --noEmit",
+    "db:generate": "node --env-file-if-exists=.env.local ./node_modules/drizzle-kit/bin.cjs generate",
+    "db:migrate": "node --env-file-if-exists=.env.local ./node_modules/drizzle-kit/bin.cjs migrate",
+    "db:studio": "node --env-file-if-exists=.env.local ./node_modules/drizzle-kit/bin.cjs studio",
+    "db:check": "node --env-file-if-exists=.env.local ./node_modules/tsx/dist/cli.mjs --conditions=react-server scripts/check-db.mts",
+    "db:seed": "node --env-file-if-exists=.env.local ./node_modules/tsx/dist/cli.mjs --conditions=react-server scripts/seed.mts",
+    "db:flow": "node --env-file-if-exists=.env.local ./node_modules/tsx/dist/cli.mjs --conditions=react-server scripts/check-flow.mts"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.2",
@@ -27,11 +33,13 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "eslint-config-next": "16.3.4",
     "prettier": "^3.9.6",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "^4",
+    "tsx": "^4.23.13",
     "typescript": "^5"
   },
   "packageManager": "pnpm@10.34.5"
