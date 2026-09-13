@@ -20,3 +20,11 @@ export type DepositState = { error?: string };
 
 /** Le jeton de gestion transite par un cookie court plutôt que par l'URL. */
 export const MANAGE_COOKIE = "ratrape_manage";
+
+/** Résultat d'une déclaration « je l'ai pris ». */
+export type TakenState =
+  | { status: "idle" }
+  | { status: "taken" }
+  /** Quelqu'un d'autre l'avait déjà déclaré, ou le camion est passé. */
+  | { status: "already" }
+  | { status: "error"; message: string };

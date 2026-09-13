@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { declareTaken } from "@/app/(app)/objet/[id]/actions";
 import { DirectionsButton } from "@/components/listing-detail/directions-button";
 import { useNeighborhood } from "@/components/shell/neighborhood-context";
+import type { TakenState } from "@/lib/deposit";
 import { formatPickup, formatPosted } from "@/lib/format";
 import { distanceMeters, formatDistance, formatWalk } from "@/lib/geo";
 import { swatchClass, type Listing } from "@/lib/types";
@@ -39,7 +41,22 @@ function InfoRow({
 
 export function ListingDetail({ listing }: { listing: Listing }) {
   const { center } = useNeighborhood();
-  const [taken, setTaken] = useState(false);
+  const [taken, setTaken] = useState<TakenState>({ status: "idle" });
+  const [pending, startTransition] = useTransition();
+
+  const declare = () => {
+    startTransition(async () => setTaken(await declareTaken(listing.id)));
+  };
+
+  const takenLabel =
+    taken.status === "taken"
+      ? "C'est noté, merci !"
+      : taken.status === "already"
+        ? "Déjà récupéré"
+        : pending
+          ? "Enregistrement…"
+          : "Je l'ai pris";
+  const done = taken.status === "taken" || taken.status === "already";
   const meters = distanceMeters(center, listing);
 
   return (
@@ -91,13 +108,25 @@ export function ListingDetail({ listing }: { listing: Listing }) {
         <DirectionsButton listing={listing} />
         <button
           type="button"
-          onClick={() => setTaken((v) => !v)}
-          aria-pressed={taken}
-          className="wide:h-[52px] border-brand bg-card font-display text-brand h-[54px] flex-1 cursor-pointer rounded-2xl border-[1.5px] text-base font-bold"
+          onClick={declare}
+          disabled={pending || done}
+          aria-pressed={done}
+          className={`wide:h-[52px] border-brand bg-card font-display text-brand h-[54px] flex-1 rounded-2xl border-[1.5px] text-base font-bold ${
+            pending || done ? "cursor-default opacity-70" : "cursor-pointer"
+          }`}
         >
-          {taken ? "C'est noté, merci !" : "Je l'ai pris"}
+          {takenLabel}
         </button>
       </div>
+
+      {taken.status === "error" ? (
+        <p
+          role="alert"
+          className="text-danger wide:px-6 flex-none px-5 pb-4 text-[13px] font-semibold"
+        >
+          {taken.message}
+        </p>
+      ) : null}
     </>
   );
 }
