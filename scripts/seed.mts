@@ -14,7 +14,7 @@ import { desc, eq } from "drizzle-orm";
 import { getDb } from "@/db/client";
 import { listings } from "@/db/schema";
 import { nextCollection, type Zone } from "@/lib/collection";
-import { DEFAULT_CENTER } from "@/lib/geo";
+import { DEFAULT_CENTER } from "@/lib/commune";
 import { generateToken, hashToken } from "@/lib/token";
 import type { Category, Condition } from "@/lib/types";
 

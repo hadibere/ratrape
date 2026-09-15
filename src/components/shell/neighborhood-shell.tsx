@@ -9,7 +9,8 @@ import {
   type NeighborhoodValue,
 } from "./neighborhood-context";
 import { useIsWide } from "./use-is-wide";
-import { DEFAULT_CENTER, distanceMeters, type LatLng } from "@/lib/geo";
+import { DEFAULT_CENTER } from "@/lib/commune";
+import { distanceMeters, type LatLng } from "@/lib/geo";
 import type { Filter, Listing } from "@/lib/types";
 
 type NeighborhoodShellProps = {

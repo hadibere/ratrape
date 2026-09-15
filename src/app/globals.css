@@ -92,3 +92,15 @@
 .maplibregl-ctrl-bottom-right {
   z-index: 1;
 }
+
+/*
+ * Sous 900 px, la bande d'objets et le bouton de dépôt flottent sur le bas de
+ * la carte. L'attribution doit rester visible, la licence OpenStreetMap
+ * l'impose : on la remonte au-dessus d'eux.
+ */
+@media (max-width: 899px) {
+  .maplibregl-ctrl-bottom-right,
+  .maplibregl-ctrl-bottom-left {
+    bottom: 184px;
+  }
+}

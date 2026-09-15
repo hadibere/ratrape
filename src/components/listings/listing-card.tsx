@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { formatDistance } from "@/lib/geo";
+import { formatDistance, formatWalk } from "@/lib/geo";
 import { ListingPhoto } from "@/components/listings/listing-photo";
 import type { Listing } from "@/lib/types";
 
@@ -10,19 +10,30 @@ type CardProps = {
 
 const href = (listing: Listing) => `/objet/${listing.id}` as const;
 
-/** Carte de la liste horizontale, sous 900 px. */
+/**
+ * Carte de la bande du bas, sous 900 px.
+ *
+ * Horizontale et courte : elle flotte au-dessus de la carte, qui doit rester
+ * visible derrière elle.
+ */
 export function ListingCard({ listing, distanceMeters }: CardProps) {
+  const walk = formatWalk(distanceMeters);
   return (
     <Link
       href={href(listing)}
-      className="border-line bg-card shadow-card w-[158px] flex-none overflow-hidden rounded-2xl border"
+      className="border-line bg-card shadow-card flex w-[190px] flex-none items-stretch gap-2.5 overflow-hidden rounded-2xl border"
     >
-      <ListingPhoto listing={listing} sizes="158px" className="border-line h-[78px] border-b" />
-      <span className="block px-[11px] pt-[9px] pb-[11px]">
-        <span className="font-display text-ink block text-sm/[1.2] font-bold">{listing.name}</span>
+      <ListingPhoto listing={listing} sizes="66px" className="w-[66px] flex-none" />
+      <span className="flex min-w-0 flex-col justify-center py-2 pr-2.5">
+        <span className="font-display text-ink block truncate text-sm/[1.2] font-bold">
+          {listing.name}
+        </span>
         <span className="text-muted mt-[3px] block text-xs">
           {formatDistance(distanceMeters)} · {listing.condition}
         </span>
+        {walk ? (
+          <span className="text-brand mt-[3px] block text-xs font-semibold">{walk}</span>
+        ) : null}
       </span>
     </Link>
   );

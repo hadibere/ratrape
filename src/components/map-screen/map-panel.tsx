@@ -1,83 +1,128 @@
 "use client";
 
 import Link from "next/link";
-
 import { RatMark } from "@/components/brand/rat-mark";
 import { EmptyState } from "@/components/listings/empty-state";
-import { CollectionBanner } from "@/components/map-screen/collection-banner";
-import { GeoBanner } from "@/components/map-screen/geo-banner";
 import { FilterChips } from "@/components/listings/filter-chips";
 import { ListingCard, ListingRow } from "@/components/listings/listing-card";
 import { LazyNeighborhoodMap } from "@/components/map/lazy-neighborhood-map";
+import { CollectionBanner } from "@/components/map-screen/collection-banner";
+import { CollectionPill } from "@/components/map-screen/collection-pill";
+import { GeoBanner } from "@/components/map-screen/geo-banner";
 import { useNeighborhood } from "@/components/shell/neighborhood-context";
 import { useIsWide } from "@/components/shell/use-is-wide";
+import { COMMUNE } from "@/lib/commune";
 
-/** Contenu du panneau pour l'écran carte : en-tête, filtres, listes et dépôt. */
+const Wordmark = () => (
+  <>
+    {/* Le mot reste lisible d'un bloc pour les lecteurs d'écran. */}
+    <span className="sr-only">Ratrape</span>
+    <span aria-hidden="true">
+      {"Rat"}
+      <RatMark className="mx-[0.07em] inline h-[0.72em] w-auto" />
+      {"rape"}
+    </span>
+  </>
+);
+
+/**
+ * Écran de la carte.
+ *
+ * Deux mises en page distinctes plutôt qu'une seule adaptée : sous 900 px la
+ * carte occupe l'écran et le reste flotte au-dessus, au-delà elle vit dans la
+ * colonne de gauche et ce panneau reste une liste ordinaire.
+ */
 export function MapPanel() {
   const { visible, filter, setFilter, center, total, nearestMeters } = useNeighborhood();
   const isWide = useIsWide();
 
+  const subtitle =
+    total === 0
+      ? `${COMMUNE.name} · aucun objet pour le moment`
+      : `${COMMUNE.name} · ${total} objet${total > 1 ? "s" : ""} à récupérer`;
+
+  const listings = visible.map((item) => item.listing);
+
   return (
     <>
-      <div className="wide:border-line-soft wide:px-6 wide:pt-[22px] wide:pb-3.5 wide:border-b flex-none px-5 pt-4 pb-3">
-        <h1 className="wide:text-[22px] font-display text-ink text-[21px]/[1.15] font-bold">
-          {/* Le mot reste lisible d'un bloc pour les lecteurs d'écran. */}
-          <span className="sr-only">Ratrape</span>
-          <span aria-hidden="true">
-            {"Rat"}
-            <RatMark className="mx-[0.07em] inline h-[0.72em] w-auto" />
-            {"rape"}
-          </span>
-        </h1>
-        <p className="text-muted mt-0.5 text-[13px]/[1.4]">
-          Maisons-Laffitte · encombrants à récupérer
-        </p>
-        <FilterChips value={filter} onChange={setFilter} className="wide:mt-3.5 mt-3 pb-0.5" />
-        <CollectionBanner className="mt-3" />
-        <GeoBanner className="mt-3" />
-      </div>
-
-      {/* Sous 900 px la carte s'insère dans la colonne ; au-delà elle occupe la gauche */}
-      <div className="wide:hidden bg-map min-h-[300px] flex-1">
+      {/* Sous 900 px : la carte est la page. */}
+      <div className="wide:hidden bg-map relative min-h-0 flex-1">
         {isWide === false ? (
           <LazyNeighborhoodMap
-            listings={visible.map((item) => item.listing)}
+            listings={listings}
             center={center}
             variant="narrow"
-            className="h-full w-full"
+            className="absolute inset-0 h-full w-full"
           />
         ) : null}
+
+        <div className="absolute inset-x-0 top-0 z-10 flex flex-col gap-2.5 p-3.5">
+          <div className="bg-surface shadow-overlay relative flex items-center gap-3 rounded-[18px] px-4 py-2.5">
+            <div className="min-w-0 flex-1">
+              <h1 className="font-display text-ink text-[19px]/[1.15] font-bold">
+                <Wordmark />
+              </h1>
+              <p className="text-muted mt-0.5 truncate text-[11.5px]">{subtitle}</p>
+            </div>
+            <CollectionPill />
+          </div>
+
+          <FilterChips value={filter} onChange={setFilter} className="pb-0.5" />
+          <GeoBanner className="shadow-overlay" />
+        </div>
+
+        <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col gap-3 pb-[max(14px,env(safe-area-inset-bottom))]">
+          <div className="scrl flex gap-2.5 overflow-x-auto px-3.5">
+            {visible.length === 0 ? (
+              <EmptyState
+                filter={filter}
+                total={total}
+                nearestMeters={nearestMeters}
+                className="bg-card shadow-overlay w-full"
+              />
+            ) : (
+              visible.map(({ listing, meters }) => (
+                <ListingCard key={listing.id} listing={listing} distanceMeters={meters} />
+              ))
+            )}
+          </div>
+          <div className="px-3.5">
+            <Link
+              href="/deposer"
+              className="bg-brand font-display shadow-cta hover:bg-brand-hover flex h-[56px] w-full items-center justify-center rounded-[18px] text-[17px] font-bold text-white"
+            >
+              Je dépose un encombrant
+            </Link>
+          </div>
+        </div>
       </div>
 
-      <div className="scrl wide:flex hidden min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-6 py-4">
-        {visible.length === 0 ? (
-          <EmptyState filter={filter} total={total} nearestMeters={nearestMeters} />
-        ) : (
-          visible.map(({ listing, meters }) => (
-            <ListingRow key={listing.id} listing={listing} distanceMeters={meters} />
-          ))
-        )}
-      </div>
+      {/* À partir de 900 px : panneau latéral, la carte occupe la colonne de gauche. */}
+      <div className="wide:flex hidden min-h-0 flex-1 flex-col">
+        <div className="border-line-soft flex-none border-b px-6 pt-[22px] pb-3.5">
+          <h1 className="font-display text-ink text-[22px]/[1.15] font-bold">
+            <Wordmark />
+          </h1>
+          <p className="text-muted mt-0.5 text-[13px]/[1.4]">{subtitle}</p>
+          <CollectionBanner className="mt-3" />
+          <GeoBanner className="mt-3" />
+          <FilterChips value={filter} onChange={setFilter} className="mt-3.5 pb-0.5" />
+        </div>
 
-      <div className="wide:border-line-soft wide:px-6 wide:pt-3.5 wide:pb-[22px] bg-surface wide:border-t flex-none pt-3 pb-[18px]">
-        <div className="scrl wide:hidden flex gap-2.5 overflow-x-auto px-5 pb-3">
+        <div className="scrl flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-6 py-4">
           {visible.length === 0 ? (
-            <EmptyState
-              filter={filter}
-              total={total}
-              nearestMeters={nearestMeters}
-              className="bg-card w-full"
-            />
+            <EmptyState filter={filter} total={total} nearestMeters={nearestMeters} />
           ) : (
             visible.map(({ listing, meters }) => (
-              <ListingCard key={listing.id} listing={listing} distanceMeters={meters} />
+              <ListingRow key={listing.id} listing={listing} distanceMeters={meters} />
             ))
           )}
         </div>
-        <div className="wide:px-0 px-5">
+
+        <div className="border-line-soft flex-none border-t px-6 pt-3.5 pb-[22px]">
           <Link
             href="/deposer"
-            className="wide:h-14 bg-brand font-display shadow-cta hover:bg-brand-hover flex h-[58px] w-full items-center justify-center rounded-[18px] text-[17px] font-bold text-white"
+            className="bg-brand font-display shadow-cta hover:bg-brand-hover flex h-14 w-full items-center justify-center rounded-[18px] text-[17px] font-bold text-white"
           >
             Je dépose un encombrant
           </Link>

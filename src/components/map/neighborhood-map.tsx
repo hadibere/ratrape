@@ -82,7 +82,11 @@ export function NeighborhoodMap({
     });
     map.touchZoomRotate.disableRotation();
     map.addControl(new AttributionControl({ compact: true, customAttribution: ATTRIBUTION }));
-    map.addControl(new NavigationControl({ showCompass: false }), "bottom-right");
+    // Les boutons de zoom n'ont pas d'intérêt sur un écran tactile, où le
+    // pincement fait le travail, et ils encombrent une carte déjà chargée.
+    if (variant === "wide") {
+      map.addControl(new NavigationControl({ showCompass: false }), "bottom-right");
+    }
 
     map.on("load", () => {
       // Limite communale : au-delà, Ratrape ne connaît ni le calendrier ni les règles.
@@ -136,7 +140,7 @@ export function NeighborhoodMap({
     };
     // Le centre initial ne doit pas recréer la carte : il est suivi plus bas.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [variant]);
 
   // Seul le point bleu suit l'habitant : la vue reste sur la commune.
   useEffect(() => {

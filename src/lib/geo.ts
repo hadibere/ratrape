@@ -1,8 +1,5 @@
 export type LatLng = { lat: number; lng: number };
 
-/** Centre par défaut tant que la géolocalisation n'a pas répondu (quartier Saint-Roch). */
-export const DEFAULT_CENTER: LatLng = { lat: 43.605, lng: 3.878 };
-
 const EARTH_RADIUS = 6_371_000;
 const rad = (deg: number) => (deg * Math.PI) / 180;
 

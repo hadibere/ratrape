@@ -20,6 +20,12 @@ export const COMMUNE = {
   },
 };
 
+/**
+ * Centre affiché tant que la géolocalisation n'a pas répondu, ou quand elle est
+ * refusée. Ratrape ne couvrant qu'une commune, c'est son centre.
+ */
+export const DEFAULT_CENTER: LatLng = COMMUNE.center;
+
 /** Anneau extérieur du polygone, en [longitude, latitude]. */
 export const COMMUNE_RING: [number, number][] = [
   [2.17822, 48.95963],
