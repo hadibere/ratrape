@@ -19,7 +19,6 @@ export type NeighborhoodValue = {
   geo: GeoStatus;
   /** Redemande la position, après un refus ou une erreur. */
   retryGeo: () => void;
-  savedThisMonth: number;
   /** Nombre d'annonces en ligne, avant filtrage : distingue « rien ici » de « rien qui corresponde ». */
   total: number;
   /** Distance du plus proche objet du quartier, filtres ignorés. */

@@ -1,5 +1,5 @@
 import "server-only";
-import { and, between, count, desc, eq, gt, gte, isNull, or } from "drizzle-orm";
+import { and, between, desc, eq, gt, isNull, or } from "drizzle-orm";
 import { getDb } from "@/db/client";
 import { listings, type ListingRow } from "@/db/schema";
 import { hashToken } from "@/lib/token";
@@ -68,45 +68,6 @@ export async function getListingByToken(token: string): Promise<Listing | null> 
   return row ? publicView(row) : null;
 }
 
-/** Premier instant du mois en cours, heure de Paris. */
-function startOfMonthInParis(now: Date = new Date()): Date {
-  const parts = new Intl.DateTimeFormat("fr-FR", {
-    timeZone: "Europe/Paris",
-    year: "numeric",
-    month: "numeric",
-  }).formatToParts(now);
-  const value = (type: string) => Number(parts.find((part) => part.type === type)?.value ?? "0");
-  const year = value("year");
-  const monthIndex = value("month") - 1;
-
-  // Décalage de Paris ce jour-là : une heure en hiver, deux en été.
-  const noon = new Date(Date.UTC(year, monthIndex, 1, 12));
-  const parisHour = Number(
-    new Intl.DateTimeFormat("fr-FR", {
-      timeZone: "Europe/Paris",
-      hour: "2-digit",
-      hourCycle: "h23",
-    })
-      .formatToParts(noon)
-      .find((part) => part.type === "hour")?.value ?? "12",
-  );
-  return new Date(Date.UTC(year, monthIndex, 1, -(parisHour - 12)));
-}
-
-/**
- * Objets réellement récupérés ce mois-ci, et rien d'autre.
- *
- * Ce compteur est la seule preuve sociale de l'application : le gonfler d'un
- * nombre inventé reviendrait à mentir aux premiers visiteurs.
- */
-export async function getSavedThisMonth(): Promise<number> {
-  const [row] = await getDb()
-    .select({ total: count() })
-    .from(listings)
-    .where(gte(listings.takenAt, startOfMonthInParis()));
-  return row?.total ?? 0;
-}
-
 export type NewListing = {
   category: Category;
   condition: Condition;
@@ -151,7 +112,7 @@ export async function createListing(input: NewListing): Promise<Listing> {
   return publicView(row);
 }
 
-/** Un voisin déclare avoir pris l'objet : l'annonce quitte la carte et le compteur monte. */
+/** Un voisin déclare avoir pris l'objet : l'annonce quitte la carte. */
 export async function markTaken(id: string): Promise<boolean> {
   const updated = await getDb()
     .update(listings)

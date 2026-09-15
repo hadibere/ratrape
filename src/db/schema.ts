@@ -25,7 +25,7 @@ export const listings = pgTable(
     status: text("status").notNull().default("available"),
     /** Empreinte SHA-256 du jeton de gestion : le jeton lui-même n'est jamais stocké. */
     manageTokenHash: text("manage_token_hash").notNull().unique(),
-    /** Renseigné quand un voisin déclare avoir pris l'objet ; sert au compteur mensuel. */
+    /** Renseigné quand un voisin déclare avoir pris l'objet : trace de ce qui a été sauvé. */
     takenAt: timestamp("taken_at", { withTimezone: true }),
   },
   (table) => [

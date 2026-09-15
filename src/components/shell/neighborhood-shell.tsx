@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { LazyNeighborhoodMap } from "@/components/map/lazy-neighborhood-map";
-import { SavedCounter } from "@/components/map/saved-counter";
 import { AppShell } from "@/components/shell/app-shell";
 import {
   NeighborhoodProvider,
@@ -15,7 +14,6 @@ import type { Filter, Listing } from "@/lib/types";
 
 type NeighborhoodShellProps = {
   listings: Listing[];
-  savedThisMonth: number;
   children: ReactNode;
 };
 
@@ -25,7 +23,7 @@ type NeighborhoodShellProps = {
  * Elle vit dans le layout, donc la carte de gauche reste montée quand on passe
  * de la carte à une fiche : seul le contenu du panneau change.
  */
-export function NeighborhoodShell({ listings, savedThisMonth, children }: NeighborhoodShellProps) {
+export function NeighborhoodShell({ listings, children }: NeighborhoodShellProps) {
   const isWide = useIsWide();
   const [filter, setFilter] = useState<Filter>("Tout");
   const [center, setCenter] = useState<LatLng>(DEFAULT_CENTER);
@@ -71,13 +69,12 @@ export function NeighborhoodShell({ listings, savedThisMonth, children }: Neighb
         setGeo("pending");
         setGeoAttempt((attempt) => attempt + 1);
       },
-      savedThisMonth,
       total: listings.length,
       // Calculé sur tout le quartier : c'est ce qui permet de dire « le plus
       // proche est à 3 km » quand la liste filtrée ne renvoie rien.
       nearestMeters: nearby[0]?.meters ?? null,
     };
-  }, [listings, center, filter, geo, savedThisMonth]);
+  }, [listings, center, filter, geo]);
 
   return (
     <NeighborhoodProvider value={value}>
@@ -92,10 +89,6 @@ export function NeighborhoodShell({ listings, savedThisMonth, children }: Neighb
                 className="h-full w-full"
               />
             ) : null}
-            <SavedCounter
-              count={savedThisMonth}
-              className="bg-surface shadow-overlay absolute top-5 left-5 z-10 px-4 py-2.5 text-sm"
-            />
           </>
         }
       >

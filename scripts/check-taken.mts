@@ -1,15 +1,9 @@
 /** Vérifie la déclaration « je l'ai pris » de bout en bout. `pnpm db:taken` */
-import {
-  createListing,
-  getAvailableListings,
-  getSavedThisMonth,
-  markTaken,
-} from "@/lib/data/listings";
+import { createListing, getAvailableListings, getListing, markTaken } from "@/lib/data/listings";
 import { generateToken } from "@/lib/token";
 
 const ok = (label: string, condition: boolean) => console.log(condition ? "OK  " : "ÉCHEC", label);
 
-const savedBefore = await getSavedThisMonth();
 const listing = await createListing({
   category: "Vélos",
   condition: "Bon état",
@@ -26,8 +20,8 @@ ok(
   (await getAvailableListings()).some((l) => l.id === listing.id),
 );
 ok("première déclaration acceptée", await markTaken(listing.id));
-ok("compteur du mois +1", (await getSavedThisMonth()) === savedBefore + 1);
+ok("statut passé à « pris »", (await getListing(listing.id))?.status === "taken");
 ok("deuxième déclaration refusée", !(await markTaken(listing.id)));
-ok("compteur inchangé après le refus", (await getSavedThisMonth()) === savedBefore + 1);
+ok("statut inchangé après le refus", (await getListing(listing.id))?.status === "taken");
 ok("retirée de la carte", !(await getAvailableListings()).some((l) => l.id === listing.id));
 process.exit(0);

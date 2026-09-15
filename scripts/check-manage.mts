@@ -4,7 +4,6 @@ import {
   getAvailableListings,
   getListing,
   getListingByToken,
-  getSavedThisMonth,
   markTakenByToken,
   removeByToken,
   updateByToken,
@@ -59,13 +58,12 @@ const upload = await uploadPhoto(
 );
 ok("photo déposée pour le test", upload.ok);
 
-const savedBefore = await getSavedThisMonth();
 ok("retrait accepté", (await removeByToken(token)) === listing.id);
 await deletePhotos(listing.id);
 const removed = await getListing(listing.id);
 ok("adresse de photo effacée de l'annonce", removed?.photoUrl === null);
 ok("disparue de la carte", !(await getAvailableListings()).some((l) => l.id === listing.id));
-ok("compteur des objets sauvés inchangé", (await getSavedThisMonth()) === savedBefore);
+ok("retrait distinct d'une récupération", removed?.status === "removed");
 ok(
   "modification refusée après retrait",
   (await updateByToken(token, { condition: "Correct", zone: "Ville", spot: "" })) === null,
@@ -85,7 +83,7 @@ const taken = await createListing({
   manageToken: second,
 });
 ok("« quelqu'un l'a pris » accepté", (await markTakenByToken(second)) === taken.id);
-ok("compteur des objets sauvés +1", (await getSavedThisMonth()) === savedBefore + 1);
+ok("statut passé à « pris »", (await getListing(taken.id))?.status === "taken");
 
 console.log("\nNettoyage : relancez `pnpm db:seed`.");
 process.exit(0);

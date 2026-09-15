@@ -4,7 +4,6 @@ import {
   getAvailableListings,
   getListing,
   getListingByToken,
-  getSavedThisMonth,
   markTaken,
   removeByToken,
 } from "@/lib/data/listings";
@@ -13,7 +12,6 @@ import { generateToken } from "@/lib/token";
 const ok = (label: string, condition: boolean) => console.log(condition ? "OK  " : "ÉCHEC", label);
 
 const before = await getAvailableListings();
-const savedBefore = await getSavedThisMonth();
 ok(`${before.length} annonces d'exemple lues`, before.length === 4);
 ok("triées de la plus récente à la plus ancienne", before[0].name === "Canapé 2 places");
 ok("aucun jeton dans les données publiques", !("manageTokenHash" in (before[0] as object)));
@@ -47,7 +45,7 @@ ok(
 ok("« je l'ai pris » accepté une fois", await markTaken(created.id));
 ok("refusé la seconde fois", !(await markTaken(created.id)));
 ok("retirée de la carte", !(await getAvailableListings()).some((l) => l.id === created.id));
-ok("compteur mensuel incrémenté", (await getSavedThisMonth()) === savedBefore + 1);
+ok("objet marqué comme pris", (await getListing(created.id))?.status === "taken");
 
 const second = generateToken();
 const toRemove = await createListing({
@@ -62,9 +60,9 @@ const toRemove = await createListing({
 });
 ok("retrait par le lien de gestion", (await removeByToken(second)) === toRemove.id);
 ok(
-  "disparue de la carte sans compter comme sauvée",
+  "disparue de la carte, et retirée plutôt que prise",
   !(await getAvailableListings()).some((l) => l.id === toRemove.id) &&
-    (await getSavedThisMonth()) === savedBefore + 1,
+    (await getListing(toRemove.id))?.status === "removed",
 );
 
 console.log("\nNettoyage : relancez `pnpm db:seed` pour repartir des 4 annonces d'exemple.");

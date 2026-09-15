@@ -11,7 +11,7 @@ const LIMIT = 10;
 const WINDOW_MS = 60 * 60 * 1000;
 
 /**
- * « Je l'ai pris » : l'annonce quitte la carte et le compteur du mois monte.
+ * « Je l'ai pris » : l'annonce quitte la carte, et la date de récupération est enregistrée.
  *
  * Aucune authentification n'est possible, l'application n'a pas de comptes.
  * On accepte donc la déclaration de bonne foi, en la limitant en débit, et le

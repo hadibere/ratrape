@@ -8,14 +8,12 @@ import { GeoBanner } from "@/components/map-screen/geo-banner";
 import { FilterChips } from "@/components/listings/filter-chips";
 import { ListingCard, ListingRow } from "@/components/listings/listing-card";
 import { LazyNeighborhoodMap } from "@/components/map/lazy-neighborhood-map";
-import { SavedCounter } from "@/components/map/saved-counter";
 import { useNeighborhood } from "@/components/shell/neighborhood-context";
 import { useIsWide } from "@/components/shell/use-is-wide";
 
 /** Contenu du panneau pour l'écran carte : en-tête, filtres, listes et dépôt. */
 export function MapPanel() {
-  const { visible, filter, setFilter, center, savedThisMonth, total, nearestMeters } =
-    useNeighborhood();
+  const { visible, filter, setFilter, center, total, nearestMeters } = useNeighborhood();
   const isWide = useIsWide();
 
   return (
@@ -27,10 +25,6 @@ export function MapPanel() {
         <p className="text-muted mt-0.5 text-[13px]/[1.4]">
           Maisons-Laffitte · encombrants à récupérer
         </p>
-        <SavedCounter
-          count={savedThisMonth}
-          className="wide:hidden bg-brand-soft mt-3 px-3.5 py-2 text-[13px]"
-        />
         <FilterChips value={filter} onChange={setFilter} className="wide:mt-3.5 mt-3 pb-0.5" />
         <CollectionBanner className="mt-3" />
         <GeoBanner className="mt-3" />
