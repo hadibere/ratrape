@@ -91,7 +91,10 @@ const db = getDb();
 async function geocode(query: string): Promise<{ lat: number; lng: number; label: string } | null> {
   const url = `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}&limit=1`;
   const response = await fetch(url);
-  if (!response.ok) return null;
+  if (!response.ok) {
+    console.error(`Service d'adresses indisponible (http ${response.status}).`);
+    process.exit(1);
+  }
   const data = (await response.json()) as {
     features?: { geometry: { coordinates: [number, number] }; properties: { label: string } }[];
   };

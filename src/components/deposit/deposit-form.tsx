@@ -5,11 +5,13 @@ import Link from "next/link";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { publishListing } from "@/app/(app)/deposer/actions";
 import type { DepositState } from "@/lib/deposit";
+import { AddressSearch, type PickedAddress } from "@/components/deposit/address-field";
 import { ChoiceButtons } from "@/components/deposit/choice-buttons";
 import { ZoneChoice } from "@/components/deposit/zone-choice";
 import { useNeighborhood } from "@/components/shell/neighborhood-context";
 import { FINE_EUROS, LIMITS, WEEE_NOTICE, type Zone } from "@/lib/collection";
 import { COMMUNE, isInsideCommune, locationRestricted } from "@/lib/commune";
+import { LocationHelp } from "@/components/map-screen/location-help";
 import { CATEGORIES, CONDITIONS, type Category, type Condition } from "@/lib/types";
 
 const SectionTitle = ({ children }: { children: string }) => (
@@ -64,9 +66,11 @@ export function DepositForm() {
   const [rule, setRule] = useState(false);
 
   const [address, setAddress] = useState("");
-  const [editingAddress, setEditingAddress] = useState(false);
   const [detecting, setDetecting] = useState(true);
   const addressTouched = useRef(false);
+  /** Adresse saisie à la main : elle fournit aussi les coordonnées. */
+  const [picked, setPicked] = useState<PickedAddress | null>(null);
+  const [typing, setTyping] = useState(false);
 
   const [photo, setPhoto] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -114,16 +118,27 @@ export function DepositForm() {
     return () => controller.abort();
   }, [center, located]);
 
-  const editAddress = (value: string) => {
+  const pickAddress = (chosen: PickedAddress) => {
     addressTouched.current = true;
-    setAddress(value);
+    setPicked(chosen);
+    setAddress(chosen.label);
+    setTyping(false);
   };
 
-  // Sans position réelle, le centre de repli est celui de la commune : publier
-  // placerait l'objet devant la mairie, avec une adresse qui n'est pas la sienne.
-  const outside = located && locationRestricted() && !isInsideCommune(center);
+  /**
+   * Le point publié vient de l'adresse saisie si elle existe, sinon du GPS.
+   * Sans l'un ni l'autre, on ne publie pas : le centre de repli placerait
+   * l'objet devant la mairie, à une adresse qui n'est pas la sienne.
+   */
+  const point = picked ?? (located ? center : null);
+  const outside = point !== null && locationRestricted() && !isInsideCommune(point);
   const ready =
-    rule && address.trim().length >= 3 && photo !== null && !preparing && !outside && located;
+    rule &&
+    address.trim().length >= 3 &&
+    photo !== null &&
+    !preparing &&
+    !outside &&
+    point !== null;
 
   return (
     <form
@@ -136,8 +151,8 @@ export function DepositForm() {
       <input type="hidden" name="category" value={category} />
       <input type="hidden" name="condition" value={condition} />
       <input type="hidden" name="zone" value={zone} />
-      <input type="hidden" name="lat" value={center.lat} />
-      <input type="hidden" name="lng" value={center.lng} />
+      <input type="hidden" name="lat" value={point?.lat ?? ""} />
+      <input type="hidden" name="lng" value={point?.lng ?? ""} />
       <input type="hidden" name="rule" value={rule ? "on" : ""} />
 
       <div className="wide:border-b wide:border-line-soft wide:px-6 wide:pt-5 wide:pb-3 flex flex-none items-center gap-3 px-5 pt-4 pb-2.5">
@@ -157,19 +172,13 @@ export function DepositForm() {
       </div>
 
       <div className="scrl wide:px-6 wide:pt-4 min-h-0 flex-1 overflow-y-auto px-5 pt-1.5 pb-2.5">
-        {!located ? (
+        {!located && !picked ? (
           <div className="bg-notice text-notice-ink mb-3 rounded-2xl px-3.5 py-3 text-[13px]/[1.45] font-semibold">
             {geo === "pending"
               ? "Recherche de votre position…"
-              : "Ratrape a besoin de votre position pour poser l’objet sur la carte et vérifier qu’il est bien à Maisons-Laffitte."}
+              : "Sans votre position, saisissez simplement votre adresse plus bas : elle suffit à poser l’objet sur la carte."}
             {geo === "denied" || geo === "unavailable" ? (
-              <button
-                type="button"
-                onClick={requestGeo}
-                className="text-brand mt-1.5 block cursor-pointer font-bold underline underline-offset-2"
-              >
-                Autoriser la localisation
-              </button>
+              <LocationHelp className="text-notice-ink mt-1.5 font-normal" />
             ) : null}
           </div>
         ) : null}
@@ -244,37 +253,30 @@ export function DepositForm() {
 
         <SectionTitle>Emplacement</SectionTitle>
         <div className="border-line bg-card rounded-2xl border px-[15px] py-[13px]">
-          <div className="flex items-center justify-between gap-2.5">
-            {editingAddress || (!address && !detecting) ? (
-              <input
-                name="address"
-                value={address}
-                onChange={(event) => editAddress(event.target.value)}
-                placeholder="Numéro et rue"
-                autoComplete="street-address"
-                className="text-ink w-full text-[15px] font-semibold outline-none"
-              />
-            ) : (
+          <input type="hidden" name="address" value={address} />
+
+          {typing || (!located && !picked) ? (
+            <AddressSearch onPick={pickAddress} autoFocus={typing} />
+          ) : (
+            <div className="flex items-center justify-between gap-2.5">
               <div className="min-w-0">
-                <input type="hidden" name="address" value={address} />
                 <div className="text-ink truncate text-[15px] font-semibold">
-                  {address || "Localisation en cours…"}
+                  {address || "Recherche de l’adresse…"}
                 </div>
                 <div className="text-muted mt-0.5 text-xs">
-                  {detecting ? "Recherche de l’adresse" : "Détecté par GPS"}
+                  {picked ? "Adresse saisie" : detecting ? "Recherche en cours" : "Détecté par GPS"}
                 </div>
               </div>
-            )}
-            {!editingAddress && address ? (
               <button
                 type="button"
-                onClick={() => setEditingAddress(true)}
+                onClick={() => setTyping(true)}
                 className="border-line bg-surface text-brand flex-none cursor-pointer rounded-full border px-3 py-[7px] text-xs font-semibold"
               >
                 Modifier
               </button>
-            ) : null}
-          </div>
+            </div>
+          )}
+
           <input
             name="spot"
             placeholder="Précision : devant le portail vert…"

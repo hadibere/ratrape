@@ -33,6 +33,31 @@ export function NeighborhoodShell({ listings, children }: NeighborhoodShellProps
   const [geoAttempt, setGeoAttempt] = useState(0);
 
   /**
+   * Un refus déjà enregistré se lit sans rien demander : autant le savoir
+   * d'emblée pour proposer la marche à suivre plutôt qu'un bouton inopérant.
+   * Si l'habitant change d'avis dans ses réglages, on relance tout seul.
+   */
+  useEffect(() => {
+    if (!navigator.permissions?.query) return;
+    let cancelled = false;
+
+    navigator.permissions
+      .query({ name: "geolocation" })
+      .then((status) => {
+        if (cancelled) return;
+        if (status.state === "denied") setGeo("denied");
+        status.onchange = () => {
+          if (status.state === "granted") setGeoAttempt((attempt) => attempt + 1);
+        };
+      })
+      .catch(() => undefined);
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  /**
    * La position n'est demandée que lorsqu'un écran la réclame.
    *
    * Surgir dès l'arrivée fait refuser par réflexe, et un refus se rétablit
