@@ -1,4 +1,4 @@
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { MANAGE_COOKIE, PHOTO_FAILED_COOKIE } from "@/lib/deposit";
 import { DepositDone } from "@/components/deposit/deposit-done";
@@ -22,7 +22,11 @@ export default async function ConfirmationPage() {
     ? `Votre ${label} est visible par le quartier. La collecte a lieu ${formatCollectionDay(collection).toLowerCase()} au matin : sortez-le ${formatEve(collection)}, un voisin peut ${pronoun} prendre d’ici là.`
     : `Votre ${label} est visible par le quartier. Dès qu’un voisin passe, il peut ${pronoun} prendre.`;
 
-  const site = process.env.NEXT_PUBLIC_SITE_URL ?? "ratrape.fr";
+  // Le lien affiché doit correspondre à l'adresse réellement ouverte : en
+  // développement, en préproduction ou en production, sans rien à configurer.
+  // NEXT_PUBLIC_SITE_URL permet d'imposer un domaine canonique si besoin.
+  const host = (await headers()).get("host");
+  const site = process.env.NEXT_PUBLIC_SITE_URL ?? host ?? "ratrape.fr";
   const manageUrl = `${site.replace(/^https?:\/\//, "")}/g/${token}`;
 
   return (
