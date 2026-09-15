@@ -6,6 +6,7 @@ import { AppShell } from "@/components/shell/app-shell";
 import {
   NeighborhoodProvider,
   type GeoStatus,
+  type NearbyListing,
   type NeighborhoodValue,
 } from "./neighborhood-context";
 import { useIsWide } from "./use-is-wide";
@@ -28,14 +29,19 @@ export function NeighborhoodShell({ listings, children }: NeighborhoodShellProps
   const isWide = useIsWide();
   const [filter, setFilter] = useState<Filter>("Tout");
   const [center, setCenter] = useState<LatLng>(DEFAULT_CENTER);
-  const [geo, setGeo] = useState<GeoStatus>("pending");
+  const [geo, setGeo] = useState<GeoStatus>("idle");
   const [geoAttempt, setGeoAttempt] = useState(0);
 
-  // Position réelle si l'habitant l'autorise, sinon le centre du quartier, mais
-  // en le disant : sans ça, il verrait des distances absurdes sans comprendre.
+  /**
+   * La position n'est demandée que lorsqu'un écran la réclame.
+   *
+   * Surgir dès l'arrivée fait refuser par réflexe, et un refus se rétablit
+   * difficilement : on paierait ce réflexe au moment du dépôt, là où la
+   * position est indispensable.
+   */
   useEffect(() => {
+    if (geoAttempt === 0) return;
     if (!("geolocation" in navigator)) {
-      // Reporté d'un tour : changer d'état pendant l'effet relancerait un rendu en cascade.
       const timer = setTimeout(() => setGeo("unavailable"), 0);
       return () => clearTimeout(timer);
     }
@@ -50,13 +56,17 @@ export function NeighborhoodShell({ listings, children }: NeighborhoodShellProps
     return () => navigator.geolocation.clearWatch(id);
   }, [geoAttempt]);
 
-  const value = useMemo<NeighborhoodValue>(() => {
-    const nearby = listings
-      .map((listing) => ({ listing, meters: distanceMeters(center, listing) }))
-      .sort((a, b) => a.meters - b.meters);
+  const located = geo === "granted";
 
-    // Ratrape tient dans une commune de 3 km de côté : filtrer par distance
-    // n'apprenait rien, tout est à portée de marche ou presque.
+  const value = useMemo<NeighborhoodValue>(() => {
+    // Sans position réelle, on garde l'ordre du serveur, le plus récent d'abord,
+    // et aucune distance n'est annoncée.
+    const nearby: NearbyListing[] = located
+      ? listings
+          .map((listing) => ({ listing, meters: distanceMeters(center, listing) }))
+          .sort((a, b) => (a.meters ?? 0) - (b.meters ?? 0))
+      : listings.map((listing) => ({ listing, meters: null }));
+
     const visible =
       filter === "Tout" ? nearby : nearby.filter((item) => item.listing.category === filter);
 
@@ -65,17 +75,16 @@ export function NeighborhoodShell({ listings, children }: NeighborhoodShellProps
       filter,
       setFilter,
       center,
+      located,
       geo,
-      retryGeo: () => {
+      requestGeo: () => {
         setGeo("pending");
         setGeoAttempt((attempt) => attempt + 1);
       },
       total: listings.length,
-      // Calculé sur tout le quartier : c'est ce qui permet de dire « le plus
-      // proche est à 3 km » quand la liste filtrée ne renvoie rien.
       nearestMeters: nearby[0]?.meters ?? null,
     };
-  }, [listings, center, filter, geo]);
+  }, [listings, center, filter, geo, located]);
 
   return (
     <NeighborhoodProvider value={value}>
@@ -86,6 +95,7 @@ export function NeighborhoodShell({ listings, children }: NeighborhoodShellProps
               <LazyNeighborhoodMap
                 listings={value.visible.map((item) => item.listing)}
                 center={center}
+                located={located}
                 variant="wide"
                 className="h-full w-full"
               />

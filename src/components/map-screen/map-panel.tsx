@@ -8,7 +8,7 @@ import { ListingCard, ListingRow } from "@/components/listings/listing-card";
 import { LazyNeighborhoodMap } from "@/components/map/lazy-neighborhood-map";
 import { CollectionBanner } from "@/components/map-screen/collection-banner";
 import { CollectionPill } from "@/components/map-screen/collection-pill";
-import { GeoBanner } from "@/components/map-screen/geo-banner";
+import { LocateButton } from "@/components/map-screen/locate-button";
 import { useNeighborhood } from "@/components/shell/neighborhood-context";
 import { useIsWide } from "@/components/shell/use-is-wide";
 import { COMMUNE } from "@/lib/commune";
@@ -33,7 +33,7 @@ const Wordmark = () => (
  * colonne de gauche et ce panneau reste une liste ordinaire.
  */
 export function MapPanel() {
-  const { visible, filter, setFilter, center, total, nearestMeters } = useNeighborhood();
+  const { visible, filter, setFilter, center, located, total, nearestMeters } = useNeighborhood();
   const isWide = useIsWide();
 
   const subtitle =
@@ -51,6 +51,7 @@ export function MapPanel() {
           <LazyNeighborhoodMap
             listings={listings}
             center={center}
+            located={located}
             variant="narrow"
             className="absolute inset-0 h-full w-full"
           />
@@ -68,7 +69,7 @@ export function MapPanel() {
           </div>
 
           <FilterChips value={filter} onChange={setFilter} className="pb-0.5" />
-          <GeoBanner className="shadow-overlay" />
+          <LocateButton className="shadow-overlay" />
         </div>
 
         <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col gap-3 pb-[max(14px,env(safe-area-inset-bottom))]">
@@ -106,7 +107,7 @@ export function MapPanel() {
           </h1>
           <p className="text-muted mt-0.5 text-[13px]/[1.4]">{subtitle}</p>
           <CollectionBanner className="mt-3" />
-          <GeoBanner className="mt-3" />
+          <LocateButton className="shadow-card mt-3" />
           <FilterChips value={filter} onChange={setFilter} className="mt-3.5 pb-0.5" />
         </div>
 

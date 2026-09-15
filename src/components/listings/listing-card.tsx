@@ -5,7 +5,8 @@ import type { Listing } from "@/lib/types";
 
 type CardProps = {
   listing: Listing;
-  distanceMeters: number;
+  /** Nulle tant que la position de l'habitant est inconnue. */
+  distanceMeters: number | null;
 };
 
 const href = (listing: Listing) => `/objet/${listing.id}` as const;
@@ -17,7 +18,7 @@ const href = (listing: Listing) => `/objet/${listing.id}` as const;
  * visible derrière elle.
  */
 export function ListingCard({ listing, distanceMeters }: CardProps) {
-  const walk = formatWalk(distanceMeters);
+  const walk = distanceMeters === null ? null : formatWalk(distanceMeters);
   return (
     <Link
       href={href(listing)}
@@ -29,7 +30,9 @@ export function ListingCard({ listing, distanceMeters }: CardProps) {
           {listing.name}
         </span>
         <span className="text-muted mt-[3px] block text-xs">
-          {formatDistance(distanceMeters)} · {listing.condition}
+          {distanceMeters === null
+            ? listing.condition
+            : `${formatDistance(distanceMeters)} · ${listing.condition}`}
         </span>
         {walk ? (
           <span className="text-brand mt-[3px] block text-xs font-semibold">{walk}</span>
@@ -57,7 +60,9 @@ export function ListingRow({ listing, distanceMeters }: CardProps) {
         </span>
         <span className="text-muted mt-1 block text-xs">{listing.address}</span>
         <span className="text-brand mt-[3px] block text-xs font-semibold">
-          {formatDistance(distanceMeters)} · {listing.condition}
+          {distanceMeters === null
+            ? listing.condition
+            : `${formatDistance(distanceMeters)} · ${listing.condition}`}
         </span>
       </span>
     </Link>

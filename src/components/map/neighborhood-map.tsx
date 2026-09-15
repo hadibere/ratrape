@@ -37,6 +37,8 @@ const ATTRIBUTION =
 type NeighborhoodMapProps = {
   listings: Listing[];
   center: LatLng;
+  /** Le point bleu ne s'affiche que si la position vient vraiment du navigateur. */
+  located: boolean;
   /** « narrow » sous 900 px, « wide » pour la colonne de gauche. */
   variant: "narrow" | "wide";
   className?: string;
@@ -45,6 +47,7 @@ type NeighborhoodMapProps = {
 export function NeighborhoodMap({
   listings,
   center,
+  located,
   variant,
   className = "",
 }: NeighborhoodMapProps) {
@@ -124,13 +127,6 @@ export function NeighborhoodMap({
     const observer = new ResizeObserver(() => map.resize());
     observer.observe(container);
 
-    const userElement = document.createElement("div");
-    userElement.className =
-      "h-[18px] w-[18px] rounded-full border-[3px] border-surface bg-you shadow-you";
-    userMarkerRef.current = new Marker({ element: userElement })
-      .setLngLat([center.lng, center.lat])
-      .addTo(map);
-
     mapRef.current = map;
     return () => {
       observer.disconnect();
@@ -138,14 +134,26 @@ export function NeighborhoodMap({
       mapRef.current = null;
       userMarkerRef.current = null;
     };
-    // Le centre initial ne doit pas recréer la carte : il est suivi plus bas.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // La carte s'ouvre sur la commune, pas sur l'habitant : elle ne dépend plus
+    // de sa position, seulement de la mise en page.
   }, [variant]);
 
-  // Seul le point bleu suit l'habitant : la vue reste sur la commune.
+  // Le point bleu apparaît avec la position et la suit ; la vue reste sur la commune.
   useEffect(() => {
-    userMarkerRef.current?.setLngLat([center.lng, center.lat]);
-  }, [center]);
+    const map = mapRef.current;
+    if (!map || !located) return;
+
+    const element = document.createElement("div");
+    element.className =
+      "h-[18px] w-[18px] rounded-full border-[3px] border-surface bg-you shadow-you";
+    const marker = new Marker({ element }).setLngLat([center.lng, center.lat]).addTo(map);
+    userMarkerRef.current = marker;
+
+    return () => {
+      marker.remove();
+      userMarkerRef.current = null;
+    };
+  }, [located, center]);
 
   // Un ancrage vide par annonce ; le contenu du pin est rendu par React dans ce nœud.
   const ids = listings.map((listing) => listing.id).join("|");

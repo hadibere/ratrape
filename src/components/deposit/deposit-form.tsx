@@ -31,7 +31,16 @@ async function reverseGeocode(lat: number, lng: number, signal: AbortSignal): Pr
 }
 
 export function DepositForm() {
-  const { center } = useNeighborhood();
+  const { center, located, geo, requestGeo } = useNeighborhood();
+
+  /**
+   * C'est ici que la position se justifie : elle remplit l'adresse et vérifie
+   * la commune. On la demande donc à l'ouverture du formulaire, et non à
+   * l'arrivée sur le site où elle se ferait refuser par réflexe.
+   */
+  useEffect(() => {
+    if (geo === "idle") requestGeo();
+  }, [geo, requestGeo]);
   const [state, formAction, pending] = useActionState<DepositState, FormData>(publishListing, {});
 
   const [category, setCategory] = useState<Category>("Meubles");
@@ -93,7 +102,7 @@ export function DepositForm() {
 
   // L'adresse suit la position tant que l'habitant ne l'a pas corrigée lui-même.
   useEffect(() => {
-    if (addressTouched.current) return;
+    if (addressTouched.current || !located) return;
     const controller = new AbortController();
     setDetecting(true);
     reverseGeocode(center.lat, center.lng, controller.signal)
@@ -103,15 +112,18 @@ export function DepositForm() {
       .catch(() => undefined)
       .finally(() => setDetecting(false));
     return () => controller.abort();
-  }, [center]);
+  }, [center, located]);
 
   const editAddress = (value: string) => {
     addressTouched.current = true;
     setAddress(value);
   };
 
-  const outside = locationRestricted() && !isInsideCommune(center);
-  const ready = rule && address.trim().length >= 3 && photo !== null && !preparing && !outside;
+  // Sans position réelle, le centre de repli est celui de la commune : publier
+  // placerait l'objet devant la mairie, avec une adresse qui n'est pas la sienne.
+  const outside = located && locationRestricted() && !isInsideCommune(center);
+  const ready =
+    rule && address.trim().length >= 3 && photo !== null && !preparing && !outside && located;
 
   return (
     <form
@@ -145,6 +157,23 @@ export function DepositForm() {
       </div>
 
       <div className="scrl wide:px-6 wide:pt-4 min-h-0 flex-1 overflow-y-auto px-5 pt-1.5 pb-2.5">
+        {!located ? (
+          <div className="bg-notice text-notice-ink mb-3 rounded-2xl px-3.5 py-3 text-[13px]/[1.45] font-semibold">
+            {geo === "pending"
+              ? "Recherche de votre position…"
+              : "Ratrape a besoin de votre position pour poser l’objet sur la carte et vérifier qu’il est bien à Maisons-Laffitte."}
+            {geo === "denied" || geo === "unavailable" ? (
+              <button
+                type="button"
+                onClick={requestGeo}
+                className="text-brand mt-1.5 block cursor-pointer font-bold underline underline-offset-2"
+              >
+                Autoriser la localisation
+              </button>
+            ) : null}
+          </div>
+        ) : null}
+
         {outside ? (
           <p className="bg-notice text-notice-ink mb-3 rounded-2xl px-3.5 py-3 text-[13px]/[1.45] font-semibold">
             Ratrape ne couvre que {COMMUNE.name} pour le moment, et vous êtes en dehors de la
