@@ -24,7 +24,8 @@
     "check:collection": "node ./node_modules/tsx/dist/cli.mjs --conditions=react-server scripts/check-collection.mts",
     "check:commune": "node ./node_modules/tsx/dist/cli.mjs --conditions=react-server scripts/check-commune.mts",
     "db:perimeter": "node --env-file-if-exists=.env.local ./node_modules/tsx/dist/cli.mjs --conditions=react-server scripts/check-perimeter.mts",
-    "check:restriction": "node ./node_modules/tsx/dist/cli.mjs --conditions=react-server scripts/check-restriction.mts"
+    "check:restriction": "node ./node_modules/tsx/dist/cli.mjs --conditions=react-server scripts/check-restriction.mts",
+    "db:counter": "node --env-file-if-exists=.env.local ./node_modules/tsx/dist/cli.mjs --conditions=react-server scripts/check-counter.mts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",

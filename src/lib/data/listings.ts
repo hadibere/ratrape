@@ -8,12 +8,6 @@ import { COMMUNE, isInsideCommune } from "@/lib/commune";
 import type { Category, Condition, Listing } from "@/lib/types";
 
 /**
- * Compteur du mois avant les objets récupérés via l'application.
- * Le quartier n'a pas attendu Ratrape pour sauver des encombrants.
- */
-const SAVED_BASE = 36;
-
-/**
  * Vue publique : ni l'empreinte du jeton, ni la date de récupération, ne sortent
  * d'ici. Une annonce dont le camion est passé est présentée comme ramassée,
  * même si personne n'a pensé à le signaler.
@@ -74,17 +68,43 @@ export async function getListingByToken(token: string): Promise<Listing | null> 
   return row ? publicView(row) : null;
 }
 
-/** Compteur affiché sur la carte : « 37 objets sauvés ce mois ». */
-export async function getSavedThisMonth(): Promise<number> {
-  const firstOfMonth = new Date();
-  firstOfMonth.setUTCDate(1);
-  firstOfMonth.setUTCHours(0, 0, 0, 0);
+/** Premier instant du mois en cours, heure de Paris. */
+function startOfMonthInParis(now: Date = new Date()): Date {
+  const parts = new Intl.DateTimeFormat("fr-FR", {
+    timeZone: "Europe/Paris",
+    year: "numeric",
+    month: "numeric",
+  }).formatToParts(now);
+  const value = (type: string) => Number(parts.find((part) => part.type === type)?.value ?? "0");
+  const year = value("year");
+  const monthIndex = value("month") - 1;
 
+  // Décalage de Paris ce jour-là : une heure en hiver, deux en été.
+  const noon = new Date(Date.UTC(year, monthIndex, 1, 12));
+  const parisHour = Number(
+    new Intl.DateTimeFormat("fr-FR", {
+      timeZone: "Europe/Paris",
+      hour: "2-digit",
+      hourCycle: "h23",
+    })
+      .formatToParts(noon)
+      .find((part) => part.type === "hour")?.value ?? "12",
+  );
+  return new Date(Date.UTC(year, monthIndex, 1, -(parisHour - 12)));
+}
+
+/**
+ * Objets réellement récupérés ce mois-ci, et rien d'autre.
+ *
+ * Ce compteur est la seule preuve sociale de l'application : le gonfler d'un
+ * nombre inventé reviendrait à mentir aux premiers visiteurs.
+ */
+export async function getSavedThisMonth(): Promise<number> {
   const [row] = await getDb()
     .select({ total: count() })
     .from(listings)
-    .where(gte(listings.takenAt, firstOfMonth));
-  return SAVED_BASE + (row?.total ?? 0);
+    .where(gte(listings.takenAt, startOfMonthInParis()));
+  return row?.total ?? 0;
 }
 
 export type NewListing = {
