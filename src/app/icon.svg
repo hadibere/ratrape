@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <title>Ratrape</title>
+  <rect width="32" height="32" rx="7" fill="#1F7A4D"/>
+  <g fill="#FBFAF6">
+    <path d="M12 25.2 C 5.2 23.8, 2.6 17.4, 5.4 11.2 C 6.2 17.6, 8 22, 12 23.4 Z"/>
+    <ellipse cx="15.8" cy="20.6" rx="8.2" ry="6.4"/>
+    <circle cx="21.8" cy="14.8" r="5.4"/>
+    <circle cx="18.4" cy="9.4" r="3.2"/>
+    <path d="M24.6 11.8 L29.8 16.2 L23.8 18.8 Z" stroke="#FBFAF6" stroke-width="1.6" stroke-linejoin="round"/>
+    <circle cx="23.9" cy="14.2" r="1.05" fill="#1F7A4D"/>
+  </g>
+</svg>
