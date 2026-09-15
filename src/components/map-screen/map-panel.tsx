@@ -86,10 +86,11 @@ export function MapPanel() {
               ))
             )}
           </div>
-          <div className="px-3.5">
+          {/* Bouton calé sur son texte : il flotte, il n'a pas à barrer l'écran. */}
+          <div className="flex justify-center px-3.5">
             <Link
               href="/deposer"
-              className="bg-brand font-display shadow-cta hover:bg-brand-hover flex h-[56px] w-full items-center justify-center rounded-[18px] text-[17px] font-bold text-white"
+              className="bg-brand font-display shadow-cta hover:bg-brand-hover flex h-[54px] items-center justify-center rounded-[18px] px-7 text-[16px] font-bold text-white"
             >
               Je dépose un encombrant
             </Link>
