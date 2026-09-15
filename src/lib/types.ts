@@ -37,22 +37,6 @@ export type Listing = {
   status: ListingStatus;
 };
 
-/** Classe de placeholder photo, en attendant les vraies photos des habitants. */
-export function swatchClass(category: Category): string {
-  switch (category) {
-    case "Meubles":
-      return "swatch-wood";
-    case "Vélos":
-      return "swatch-bike";
-    case "Déco":
-      return "swatch-deco";
-    case "Literie":
-      return "swatch-bed";
-    default:
-      return "swatch-other";
-  }
-}
-
 /** Article et libellé au singulier, pour la phrase de confirmation. */
 export const CATEGORY_PHRASE: Record<Category, { article: "le" | "la"; label: string }> = {
   Meubles: { article: "le", label: "meuble" },

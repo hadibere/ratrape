@@ -1,5 +1,6 @@
 import Image from "next/image";
-import { swatchClass, type Listing } from "@/lib/types";
+import { CategoryIcon } from "@/components/listings/category-icon";
+import type { Listing } from "@/lib/types";
 
 type ListingPhotoProps = {
   listing: Listing;
@@ -16,7 +17,11 @@ type ListingPhotoProps = {
  */
 export function ListingPhoto({ listing, className = "", sizes, priority }: ListingPhotoProps) {
   if (!listing.photoUrl) {
-    return <span className={`block ${swatchClass(listing.category)} ${className}`} />;
+    return (
+      <span className={`bg-brand-soft text-brand flex items-center justify-center ${className}`}>
+        <CategoryIcon category={listing.category} className="h-2/5 w-2/5" />
+      </span>
+    );
   }
   return (
     <span className={`relative block overflow-hidden ${className}`}>

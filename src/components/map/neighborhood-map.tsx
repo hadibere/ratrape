@@ -9,11 +9,12 @@ import {
 } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import Link from "next/link";
+import { CategoryIcon } from "@/components/listings/category-icon";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { COMMUNE, COMMUNE_GEOJSON, OUTSIDE_COMMUNE_GEOJSON } from "@/lib/commune";
 import type { LatLng } from "@/lib/geo";
-import { swatchClass, type Listing } from "@/lib/types";
+import type { Listing } from "@/lib/types";
 
 /**
  * MapLibre cherche son worker à côté de `import.meta.url`, ce qui donne la page
@@ -32,11 +33,6 @@ const STYLE_URL = "https://tiles.openfreemap.org/styles/positron";
 /** Le style ne porte pas l'attribution : la licence OpenStreetMap l'impose, on l'ajoute. */
 const ATTRIBUTION =
   '<a href="https://openfreemap.org" target="_blank" rel="noreferrer">OpenFreeMap</a> · © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a>';
-
-/** Étiquette courte affichée dans le pin, en attendant un jeu d'icônes. */
-function pinTag(name: string): string {
-  return name.split(" ")[0].toUpperCase().slice(0, 8);
-}
 
 type NeighborhoodMapProps = {
   listings: Listing[];
@@ -194,7 +190,9 @@ export function NeighborhoodMap({
             className="flex flex-col items-center"
           >
             <span
-              className={`border-brand text-ink relative flex items-center justify-center overflow-hidden rounded-full border-[3px] text-center font-mono text-[10px]/[1.1] font-bold ${pinSize} ${listing.photoUrl ? "" : swatchClass(listing.category)}`}
+              className={`border-brand relative flex items-center justify-center overflow-hidden rounded-full border-[3px] ${pinSize} ${
+                listing.photoUrl ? "" : "bg-brand-soft text-brand"
+              }`}
             >
               {listing.photoUrl ? (
                 // Rendu dans un marqueur MapLibre : une balise simple suffit.
@@ -205,7 +203,7 @@ export function NeighborhoodMap({
                   className="absolute inset-0 h-full w-full object-cover"
                 />
               ) : (
-                pinTag(listing.name)
+                <CategoryIcon category={listing.category} className="h-1/2 w-1/2" />
               )}
             </span>
             <span className="bg-brand -mt-1.5 h-2.5 w-2.5 rotate-45 rounded-[2px]" />

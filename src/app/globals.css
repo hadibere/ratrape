@@ -79,28 +79,7 @@
   display: none;
 }
 
-/* Photos factices : rayures diagonales (remplacées par les vraies photos) */
-.swatch-sofa {
-  background: repeating-linear-gradient(45deg, #e3dccb 0 9px, #d8d0bc 9px 18px);
-}
-.swatch-wood {
-  background: repeating-linear-gradient(45deg, #e7d8c3 0 9px, #dccab1 9px 18px);
-}
-.swatch-bike {
-  background: repeating-linear-gradient(45deg, #d9e3e8 0 9px, #c9d6dd 9px 18px);
-}
-.swatch-appl {
-  background: repeating-linear-gradient(45deg, #e4e7e2 0 9px, #d6dbd4 9px 18px);
-}
-.swatch-deco {
-  background: repeating-linear-gradient(45deg, #e8dfe6 0 9px, #dccfd9 9px 18px);
-}
-.swatch-bed {
-  background: repeating-linear-gradient(45deg, #e6e2d6 0 9px, #dad5c6 9px 18px);
-}
-.swatch-other {
-  background: repeating-linear-gradient(45deg, #e2e4e0 0 9px, #d4d7d2 9px 18px);
-}
+/* Zone de dépôt de photo, en attente d'image. */
 .swatch-photo-zone {
   background: repeating-linear-gradient(45deg, #f1f3ee 0 10px, #e8ede5 10px 20px);
 }
