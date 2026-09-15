@@ -11,7 +11,11 @@ export type Category = (typeof CATEGORIES)[number];
 export const CONDITIONS = ["Bon état", "Correct", "À réparer"] as const;
 export type Condition = (typeof CONDITIONS)[number];
 
-export const FILTERS = ["Tout", "Meubles", "Vélos", "Déco", "Moins de 500 m"] as const;
+/**
+ * Filtres de la carte, dérivés des catégories : une catégorie ajoutée devient
+ * filtrable sans rien changer ici, et aucune ne peut être oubliée.
+ */
+export const FILTERS = ["Tout", ...CATEGORIES] as const;
 export type Filter = (typeof FILTERS)[number];
 
 export type ListingStatus = "available" | "taken" | "collected" | "removed";

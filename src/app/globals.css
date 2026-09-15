@@ -40,25 +40,35 @@
   --shadow-you: 0 0 0 8px rgba(46, 123, 214, 0.16);
 }
 
-html,
-body {
-  height: 100%;
-}
+/*
+ * Ces règles vont dans la couche « base ».
+ *
+ * Sans elle, une déclaration hors couche l'emporte sur toutes les classes
+ * utilitaires, quelle que soit leur spécificité : la couleur des liens écrasait
+ * `text-white` et rendait invisible le texte des boutons qui sont des liens.
+ */
+@layer base {
+  html,
+  body {
+    height: 100%;
+  }
 
-body {
-  margin: 0;
-  background: var(--color-page);
-  color: var(--color-ink);
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-  overscroll-behavior-y: none;
-}
+  body {
+    margin: 0;
+    background: var(--color-page);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior-y: none;
+  }
 
-a {
-  color: var(--color-brand);
-}
-a:hover {
-  color: var(--color-ink);
+  /* Liens de texte courant ; les liens habillés en bouton portent leur couleur. */
+  a {
+    color: var(--color-brand);
+  }
+  a:hover {
+    color: var(--color-ink);
+  }
 }
 
 /* Scrollbars masquées (listes horizontales, panneaux) */

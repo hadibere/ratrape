@@ -56,12 +56,10 @@ export function NeighborhoodShell({ listings, savedThisMonth, children }: Neighb
       .map((listing) => ({ listing, meters: distanceMeters(center, listing) }))
       .sort((a, b) => a.meters - b.meters);
 
+    // Ratrape tient dans une commune de 3 km de côté : filtrer par distance
+    // n'apprenait rien, tout est à portée de marche ou presque.
     const visible =
-      filter === "Tout"
-        ? nearby
-        : filter === "Moins de 500 m"
-          ? nearby.filter((item) => item.meters < 500)
-          : nearby.filter((item) => item.listing.category === filter);
+      filter === "Tout" ? nearby : nearby.filter((item) => item.listing.category === filter);
 
     return {
       visible,
