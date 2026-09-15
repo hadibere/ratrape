@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 
+import { RatMark } from "@/components/brand/rat-mark";
 import { EmptyState } from "@/components/listings/empty-state";
 import { CollectionBanner } from "@/components/map-screen/collection-banner";
 import { GeoBanner } from "@/components/map-screen/geo-banner";
@@ -20,7 +21,13 @@ export function MapPanel() {
     <>
       <div className="wide:border-line-soft wide:px-6 wide:pt-[22px] wide:pb-3.5 wide:border-b flex-none px-5 pt-4 pb-3">
         <h1 className="wide:text-[22px] font-display text-ink text-[21px]/[1.15] font-bold">
-          Ratrape
+          {/* Le mot reste lisible d'un bloc pour les lecteurs d'écran. */}
+          <span className="sr-only">Ratrape</span>
+          <span aria-hidden="true">
+            {"Rat"}
+            <RatMark className="mx-[0.07em] inline h-[0.72em] w-auto" />
+            {"rape"}
+          </span>
         </h1>
         <p className="text-muted mt-0.5 text-[13px]/[1.4]">
           Maisons-Laffitte · encombrants à récupérer
