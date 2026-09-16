@@ -2,7 +2,7 @@
 
 import { createContext, useContext } from "react";
 import type { LatLng } from "@/lib/geo";
-import type { Filter, Listing } from "@/lib/types";
+import type { Listing } from "@/lib/types";
 
 /**
  * État de la demande de position.
@@ -16,10 +16,8 @@ export type GeoStatus = "idle" | "pending" | "granted" | "denied" | "unavailable
 export type NearbyListing = { listing: Listing; meters: number | null };
 
 export type NeighborhoodValue = {
-  /** Annonces filtrées, de la plus proche à la plus lointaine si la position est connue. */
+  /** Annonces de la plus proche à la plus lointaine si la position est connue. */
   visible: NearbyListing[];
-  filter: Filter;
-  setFilter: (filter: Filter) => void;
   /** Position de l'habitant, ou centre de la commune tant qu'elle est inconnue. */
   center: LatLng;
   /** Vraie position obtenue, par opposition au centre de repli. */
@@ -27,10 +25,8 @@ export type NeighborhoodValue = {
   geo: GeoStatus;
   /** Demande la position ; c'est aux écrans de choisir le bon moment. */
   requestGeo: () => void;
-  /** Nombre d'annonces en ligne, avant filtrage : distingue « rien ici » de « rien qui corresponde ». */
+  /** Nombre d'annonces en ligne, annoncé sous le titre. */
   total: number;
-  /** Distance du plus proche objet, si la position est connue. */
-  nearestMeters: number | null;
 };
 
 const NeighborhoodContext = createContext<NeighborhoodValue | null>(null);

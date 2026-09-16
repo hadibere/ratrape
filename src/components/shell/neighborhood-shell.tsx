@@ -12,7 +12,7 @@ import {
 import { useIsWide } from "./use-is-wide";
 import { DEFAULT_CENTER } from "@/lib/commune";
 import { distanceMeters, type LatLng } from "@/lib/geo";
-import type { Filter, Listing } from "@/lib/types";
+import type { Listing } from "@/lib/types";
 
 type NeighborhoodShellProps = {
   listings: Listing[];
@@ -27,7 +27,6 @@ type NeighborhoodShellProps = {
  */
 export function NeighborhoodShell({ listings, children }: NeighborhoodShellProps) {
   const isWide = useIsWide();
-  const [filter, setFilter] = useState<Filter>("Tout");
   const [center, setCenter] = useState<LatLng>(DEFAULT_CENTER);
   const [geo, setGeo] = useState<GeoStatus>("idle");
   const [geoAttempt, setGeoAttempt] = useState(0);
@@ -92,13 +91,8 @@ export function NeighborhoodShell({ listings, children }: NeighborhoodShellProps
           .sort((a, b) => (a.meters ?? 0) - (b.meters ?? 0))
       : listings.map((listing) => ({ listing, meters: null }));
 
-    const visible =
-      filter === "Tout" ? nearby : nearby.filter((item) => item.listing.category === filter);
-
     return {
-      visible,
-      filter,
-      setFilter,
+      visible: nearby,
       center,
       located,
       geo,
@@ -107,9 +101,8 @@ export function NeighborhoodShell({ listings, children }: NeighborhoodShellProps
         setGeoAttempt((attempt) => attempt + 1);
       },
       total: listings.length,
-      nearestMeters: nearby[0]?.meters ?? null,
     };
-  }, [listings, center, filter, geo, located]);
+  }, [listings, center, geo, located]);
 
   return (
     <NeighborhoodProvider value={value}>

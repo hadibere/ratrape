@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { RatMark } from "@/components/brand/rat-mark";
 import { EmptyState } from "@/components/listings/empty-state";
-import { FilterChips } from "@/components/listings/filter-chips";
 import { ListingCard, ListingRow } from "@/components/listings/listing-card";
 import { LazyNeighborhoodMap } from "@/components/map/lazy-neighborhood-map";
 import { CollectionBanner } from "@/components/map-screen/collection-banner";
@@ -33,7 +32,7 @@ const Wordmark = () => (
  * colonne de gauche et ce panneau reste une liste ordinaire.
  */
 export function MapPanel() {
-  const { visible, filter, setFilter, center, located, total, nearestMeters } = useNeighborhood();
+  const { visible, center, located, total } = useNeighborhood();
   const isWide = useIsWide();
 
   const subtitle =
@@ -68,19 +67,13 @@ export function MapPanel() {
             <CollectionPill />
           </div>
 
-          <FilterChips value={filter} onChange={setFilter} className="pb-0.5" />
           <LocateButton className="shadow-overlay" />
         </div>
 
         <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col gap-3 pb-[max(14px,env(safe-area-inset-bottom))]">
           <div className="scrl flex gap-2.5 overflow-x-auto px-3.5">
             {visible.length === 0 ? (
-              <EmptyState
-                filter={filter}
-                total={total}
-                nearestMeters={nearestMeters}
-                className="bg-card shadow-overlay w-full"
-              />
+              <EmptyState className="bg-card shadow-overlay w-full" />
             ) : (
               visible.map(({ listing, meters }) => (
                 <ListingCard key={listing.id} listing={listing} distanceMeters={meters} />
@@ -108,12 +101,11 @@ export function MapPanel() {
           <p className="text-muted mt-0.5 text-[13px]/[1.4]">{subtitle}</p>
           <CollectionBanner className="mt-3" />
           <LocateButton className="shadow-card mt-3" />
-          <FilterChips value={filter} onChange={setFilter} className="mt-3.5 pb-0.5" />
         </div>
 
         <div className="scrl flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-6 py-4">
           {visible.length === 0 ? (
-            <EmptyState filter={filter} total={total} nearestMeters={nearestMeters} />
+            <EmptyState />
           ) : (
             visible.map(({ listing, meters }) => (
               <ListingRow key={listing.id} listing={listing} distanceMeters={meters} />
